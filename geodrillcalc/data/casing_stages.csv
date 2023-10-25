@@ -1,0 +1,7 @@
+﻿Casing stages,Top (m),Bottom (m),Casing (m),Drill bit (m)
+Pre-collar,0,12,0.762,0.9144
+Superficial casing,,,,
+Pump chamber casing,0,105,0.339725,0.4445
+Intermediate casing,105,990,0.168275,0.269875
+Screen riser,980,1000,0.1397,0.2286
+Production screen,1000,1070,0.1397,0.2286
