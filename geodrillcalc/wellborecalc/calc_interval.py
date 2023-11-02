@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import numpy as np
 #import logging
-from utils import getlogger, find_next_largest_value
+from geodrillcalc.utils.utils import getlogger
 
 logger = getlogger()
 

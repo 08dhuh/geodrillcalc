@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 import logging
 import numpy as np
-
+import functools
 
 def getlogger() -> logging.Logger:
     """
@@ -66,3 +67,18 @@ def find_next_largest_value(val, array):
     #TODO: read casing diameter csv, import the column in meters,
     #use round_algorithm function predefined 
     
+def validate_data(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        # Check the validity of the data.
+        if not self.casing_data['casing_diameter_data']:
+            raise ValueError('casing_diameter_data is required.')
+
+        if not self.depth_data:
+            raise ValueError('depth_data is required.')
+
+        # Call the decorated function.
+        return func(self, *args, **kwargs)
+
+    return wrapper
+

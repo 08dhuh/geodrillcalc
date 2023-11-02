@@ -1,11 +1,12 @@
-#!/usr/bin/env python3
-
-import geodrillcalc.wellbore_param_calc as wpc
+#!/usr/bin/env python
 
 def test_working():
-    print(wpc.assign_pump_diameter(5))
     assert 1==1
-    return True
+
+def test_imports():
+    import geodrillcalc
+    
+
 
 
 
