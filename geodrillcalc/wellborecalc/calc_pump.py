@@ -63,15 +63,15 @@ def calculate_safety_margin(groundwater_depth, allowable_drawdown):
     ii. M = the larger of 10 m or [0.2 * (WD + Sw)] m
 
     Parameters:
-    - groundwater_depth: (float) Depth of the groundwater table in meters (WD).
-    - allowable_drawdown: (float) Allowable drawdown in meters (Sw).
+        groundwater_depth: (float) Depth of the groundwater table in meters (WD).
+        allowable_drawdown: (float) Allowable drawdown in meters (Sw).
 
     Returns:
-    - M: (float) The safety margin, M (m), for groundwater drawdown.
+        M: (float) The safety margin, M (m), for groundwater drawdown.
 
     ----------------------------------------------------------------
     Notes:
-    - The safety margin is determined by taking the larger value between 10 metres and 0.2 times the sum
+        The safety margin is determined by taking the larger value between 10 metres and 0.2 times the sum
       of the groundwater depth (WD) and allowable drawdown (Sw).
     """
     return max(10, 0.2 * (groundwater_depth + allowable_drawdown))
@@ -87,18 +87,18 @@ def calculate_pump_inlet_depth(groundwater_depth, allowable_drawdown, safety_mar
     v. Bore/project lifetime, t (years)
 
     Parameters:
-    - groundwater_depth: (float) Present water depth relative to the ground in metres (WD).
-    - allowable_drawdown: (float) Allowable drawdown in metres (Sw).
-    - safety_margin: (float) Safety margin in metres (M).
-    - long_term_decline_rate: (float) Long-term decline rate in water level in metres per year (dS/dt).
-    - bore_lifetime: (float) Bore/project lifetime in years (t).
+        groundwater_depth: (float) Present water depth relative to the ground in metres (WD).
+        allowable_drawdown: (float) Allowable drawdown in metres (Sw).
+        safety_margin: (float) Safety margin in metres (M).
+        long_term_decline_rate: (float) Long-term decline rate in water level in metres per year (dS/dt).
+        bore_lifetime: (float) Bore/project lifetime in years (t).
 
     Returns:
-    - pump_inlet_depth: (float) Pump inlet depth in metres.
+        pump_inlet_depth: (float) Pump inlet depth in metres.
 
     ----------------------------------------------------------------
     Notes:
-    - The pump inlet depth is calculated by summing the groundwater depth (WD), allowable drawdown (Sw),
+        The pump inlet depth is calculated by summing the groundwater depth (WD), allowable drawdown (Sw),
       safety margin (M), and the product of long-term decline rate (dS/dt) and bore/project lifetime (t).
     """
     # Inlet or chamber
