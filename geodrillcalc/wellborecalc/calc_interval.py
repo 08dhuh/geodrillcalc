@@ -71,11 +71,10 @@ def calculate_minimum_screen_length(req_flow_rate:float,
         ii.	Aquifer hydraulic conductivity, K (m/day)
         iii. Bore/project lifetime, t (days)
         iv. Aquifer thickness, Z (m)
-        v.	Production or injection bore? 
-        vi.	Allowable drawdown, Sw (m) default: Sw = 25 m
-        vii.	Bore radius, r (m) , default: r = 0.0762 m (3”)
-        viii.	Aquifer specific storage, Ss (m-1) , default: Ss = 2x10-4 m-1
-
+        v.	Allowable drawdown, Sw (m) default: Sw = 25 m
+        vi.	Bore radius, r (m) , default: r = 0.0762 m (3”)
+        vii.	Aquifer specific storage, Ss (m-1) , default: Ss = 2x10-4 m-1
+        viii.	Production or injection bore? True for production
     --------------------------------------------------------
     Returns
         SL: (float) nominal value of the minimum screen length (metres)
@@ -94,7 +93,7 @@ def calculate_minimum_screen_length(req_flow_rate:float,
 
 def calculate_casing_friction(depth_to_top_screen:float,
                               req_flow_rate:float,
-                              prod_casing_diameter:float,
+                              casing_diameter:float or np.ndarray,
                               pipe_roughness_coeff:float=100.):
     """
     Estimates production casing friction loss above aquifer
@@ -104,18 +103,31 @@ def calculate_casing_friction(depth_to_top_screen:float,
     Input Parameters:
         depth_to_top_screen: (float) Depth to top of screen in metres (m).
         req_flow_rate: (float) Required flow rate in cubic metres per second (m^3/s).
-        prod_casing_diameter: (float) Production casing diameter in metres (m).
+        casing_diameter: (float or np.ndarray) Casing diameter in metres (m).
         pipe_roughness_coeff: (float) Pipe roughness coefficient, default: 100 for steel
 
     ----------------------------------------------------------------
     Returns:
         hfpc: (float) production casing friction loss (metres)
     """
-    hfpc = (10.67*depth_to_top_screen*req_flow_rate**1.852)/(pipe_roughness_coeff**1.852 * prod_casing_diameter**4.8704)
+    hfpc = (10.67*depth_to_top_screen*req_flow_rate**1.852)/(pipe_roughness_coeff**1.852 * casing_diameter**4.8704)
     return hfpc
 
+def calculate_minimum_screen_diameter(up_hole_frictions:np.ndarray,
+                                      screen_length,
+                                      req_flow_rate,
+                                      pipe_roughness_coeff=100):
+    high_friction_mask = up_hole_frictions > 20
+    
+    d = np.empty_like(up_hole_frictions, dtype=float)
+    d[~high_friction_mask] = (10.67 * screen_length * req_flow_rate**1.852) / (2 * pipe_roughness_coeff**1.852 * (20 - up_hole_frictions[~high_friction_mask]))**(1/4.8704)
+
+    d[high_friction_mask] = np.nan
+    
+    return d
+
 #TODO: in the pipeline, should be rounded
-def calculate_minimum_screen_diameter(up_hole_friction:float,
+def _calculate_minimum_screen_diameter(up_hole_friction:float,
                                       screen_length:float,
                                       req_flow_rate:float,
                                       pipe_roughness_coeff:float=100.):
@@ -124,7 +136,7 @@ def calculate_minimum_screen_diameter(up_hole_friction:float,
     Reference: https://en.wikipedia.org/wiki/Hazen%E2%80%93Williams_equation#SI_units
 
     Parameters:
-    - up_hole_friction: (float) Up-hole friction in m. Must be smaller than 20; otherwise, np.nan is returned.
+    - up_hole_friction: (float or np.ndarray) Up-hole friction in m. Must be smaller than 20; otherwise, np.nan is returned.
     - screen_length: (float) Length of the screen in metres (m).
     - prod_casing_diameter: (float) Production casing diameter in metres (m).
     - req_flow_rate: (float) Required flow rate in seconds (m^3/s).
@@ -142,7 +154,7 @@ def calculate_minimum_screen_diameter(up_hole_friction:float,
 
     try:
         if up_hole_friction > 20:
-            logger.debug(f"{up_hole_friction} Up-hole friction is too high")
+            #logger.debug(f"{up_hole_friction} Up-hole friction is too high")
             return np.nan
             #raise ValueError("Up-hole friction is too high")
         d = (10.67 * screen_length * req_flow_rate**1.852)\
@@ -151,7 +163,7 @@ def calculate_minimum_screen_diameter(up_hole_friction:float,
         return d
     except ValueError as e:
         logger.exception(e)
-        return np.nan
+        #return np.nan
     
 def calculate_total_casing(prod_casing_diameter:float,
                            screen_diameter,
