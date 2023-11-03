@@ -120,7 +120,8 @@ def calculate_minimum_screen_diameter(up_hole_frictions:np.ndarray,
     high_friction_mask = up_hole_frictions > 20
     
     d = np.empty_like(up_hole_frictions, dtype=float)
-    d[~high_friction_mask] = (10.67 * screen_length * req_flow_rate**1.852) / (2 * pipe_roughness_coeff**1.852 * (20 - up_hole_frictions[~high_friction_mask]))**(1/4.8704)
+    d[~high_friction_mask] = ((10.67 * screen_length * req_flow_rate**1.852) \
+        / (2 * pipe_roughness_coeff**1.852 * (20 - up_hole_frictions[~high_friction_mask])))**(1/4.8704)
 
     d[high_friction_mask] = np.nan
     
@@ -231,9 +232,6 @@ def calculate_minimum_open_hole_diameter(req_flow_rate_sec,
     Returns:
         ohd_min: (float) Minimum open hole diameter (OHD) required to meet the specified flow rate, in metres (m).
 
-    Notes:
-        - The sand face velocity is the ratio of flow rate to (0.01 * π * screen length * porosity).
-        - NGR (Net-to-Gross Ratio) is used to account for the proportion of porous reservoir rock in the aquifer.
     """
     # TODO: prod/injection : sand face velocity differs
     # sand face velocity
