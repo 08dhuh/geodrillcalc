@@ -133,7 +133,10 @@ def calculate_pump_chamber_depths(is_pump_chamber_required: bool, pump_inlet_dep
         return [top, top + pump_inlet_depth]
     return [np.nan, np.nan]
 
-def calculate_intermediate_casing_diameter(screen_diameter, smallest_production_casing_diameter, casing_diameter_data):
+
+def calculate_intermediate_casing_diameter(screen_diameter, 
+                                           smallest_production_casing_diameter, 
+                                           casing_diameter_data):
     """
     Calculates the intermediate casing diameter based on the given parameters.
 
@@ -291,14 +294,15 @@ def calculate_superficial_casing_diameter(is_superficial_casing_required, diamet
         return np.nan
 
 def calculate_drill_bit_diameter(casing_stage_diameter: float, 
-                                 casing_recommended_bit_dataframe):
+                                 casing_dataframe,
+                                 casing_recommended_bit_columns=['metres','recommended_bit']):
     """
     Calculates the recommended drill bit diameter based on the casing stage diameter.
 
     Parameters:
     - casing_stage_diameter: (float) Diameter of the casing stage.
-    - casing_recommended_bit_dataframe: DataFrame containing diameters and their corresponding recommended bits.
-
+    - casing_dataframe: DataFrame containing diameters and their corresponding recommended bits.
+    - casing_recommended_bit_columns=['metres','recommended_bit']
     Returns:
     - drill_bit_diameter: (float) Recommended drill bit diameter.
 
@@ -309,8 +313,8 @@ def calculate_drill_bit_diameter(casing_stage_diameter: float,
     - If there are missing or non-matching values, an error is logged, and the function returns np.nan.
 
     """
-    col1, col2 = casing_recommended_bit_dataframe.columns
-    value = casing_recommended_bit_dataframe.loc[casing_recommended_bit_dataframe[col1] == casing_stage_diameter][col2].values
+    col1, col2 = casing_recommended_bit_columns
+    value = casing_dataframe.loc[casing_dataframe[col1] == casing_stage_diameter][col2].values
     if len(value) > 0:
         return value[0]
     else:
@@ -335,7 +339,10 @@ def calculate_screen_depths(depth_to_top_screen, screen_length, aquifer_thicknes
     - It checks whether the screen length is larger than the aquifer thickness and raises an error if the condition is not met.
 
     """
-    if aquifer_thickness < screen_length:
-        raise ValueError("aquifer thickness should be smaller than the screen length")
-    return [depth_to_top_screen, round(depth_to_top_screen + screen_length)]
+    try:
+        if aquifer_thickness < screen_length:
+            raise ValueError("aquifer thickness should be smaller than the screen length")
+        return [depth_to_top_screen, round(depth_to_top_screen + screen_length)]
+    except ValueError as e:
+         return [depth_to_top_screen, np.nan]
 
