@@ -3,16 +3,18 @@ import logging
 import numpy as np
 import functools
 
+logger=None
 
 def getlogger() -> logging.Logger:
     """
     Get the pre-configured logger instance.
-
-
+    
     """
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S %d-%m-%Y")
-    logger = logging.getLogger()
+    global logger
+    if logger is None:
+        logger = logging.getLogger(__name__)
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S %d-%m-%Y")
     return logger
 
 

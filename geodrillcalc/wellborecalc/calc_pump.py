@@ -29,11 +29,10 @@ def assign_pump_diameter(req_flow_rate_sec,):
 
     Parameters:
         req_flow_rate_sec: (float) Required flow rate in litres per second (L/s).
-        diameter_range: (list, optional) Custom range of diameters to use for assignment.
-        flow_rate_conditions: (list, optional) Custom flow rate conditions for diameter assignment.
+
 
     Returns:
-        (float) Assigned pump diameter, P (m), based on the required flow rate.
+        (float) Assigned pump diameter based on the required flow rate.
 
     ----------------------------------------------------------------
     Notes:
