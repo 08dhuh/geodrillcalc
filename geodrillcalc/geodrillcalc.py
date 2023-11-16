@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from wellbore_dict import WellBoreDict
-from calc_pipeline import CalcPipeline
-from utils.utils import getlogger
+from .utils.utils import getlogger
+from .wellbore_dict import WellBoreDict
+from .calc_pipeline import CalcPipeline
 
 class GeoDrillCalcInterface:
     """
@@ -14,10 +14,11 @@ class GeoDrillCalcInterface:
     - logger: A logger for handling log messages in the GeoDrillCalcInterface class.
 
     Methods:
-    - calculate_and_return_wellbore_parameters(self, is_production_pump: bool, depth_data, initial_input_data): 
+    - calculate_and_return_wellbore_parameters(self, is_production_pump: bool, depth_data, initial_input_data):
       Calculates wellbore parameters using WellBoreDict and CalcPipeline and returns the WellBoreDict instance.
    
     Example Usage:
+
     geo_interface = GeoDrillCalcInterface()
 
     result_wbd = geo_interface.calculate_and_return_wellbore_parameters(
@@ -26,16 +27,19 @@ class GeoDrillCalcInterface:
         initial_input_data=initial_values
     )
 
-    Note: Ensure that you provide valid depth data and initial input data when using the 'calculate_and_return_wellbore_parameters' method.
+    Note: Ensure that you provide valid depth data and initial input data
+    when using the 'calculate_and_return_wellbore_parameters' method.
     """
     def __init__(self, is_production_pump:bool = None):
         self.wbd = None
         self.cpl = None
         self.is_production_pump = is_production_pump or None
-        
         self.logger = getlogger()
 
-    def calculate_and_return_wellbore_parameters(self, is_production_pump:bool, depth_data, initial_input_data):
+    def calculate_and_return_wellbore_parameters(self,
+                                                 is_production_pump:bool,
+                                                 depth_data,
+                                                 initial_input_data):
         self._initialise(depth_data, initial_input_data)
         self.cpl = CalcPipeline(self.wbd)
         self.cpl.calc_pipeline(is_production_pump)
@@ -45,8 +49,8 @@ class GeoDrillCalcInterface:
     def _initialise(self, depth_data, initial_input_data):
         if self.wbd is None:
             self.wbd = WellBoreDict()
-        self.wbd.initialise_and_validate_input_data(depth_data=depth_data, **initial_input_data)
-        
+        self.wbd.initialise_and_validate_input_data(depth_data=depth_data,
+                                                    **initial_input_data)
         
     def _log_outcome(self):
         if not self.wbd.is_initialised or not self.wbd.calculation_completed:
@@ -54,5 +58,3 @@ class GeoDrillCalcInterface:
         for key in self.wbd.outcome_params:
             value = getattr(self.wbd, key)
             self.logger.info(f"{key}: {value}")
-
-

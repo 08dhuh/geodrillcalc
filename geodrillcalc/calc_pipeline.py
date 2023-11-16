@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import numpy as np
 import pandas as pd
-from wellbore_dict import WellBoreDict
-from wellborecalc import calc_casing as cc, calc_interval as ci, calc_pump as cp
-from utils.utils import getlogger, find_next_largest_value
+from .wellbore_dict import WellBoreDict
+from .wellborecalc import calc_casing as cc, calc_interval as ci, calc_pump as cp
+from .utils.utils import getlogger, find_next_largest_value
 
 logger = getlogger()
 
