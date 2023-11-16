@@ -3,7 +3,7 @@
 Set up for the module
 """
 
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 
 
@@ -26,7 +26,7 @@ requirements = ['numpy>=1.0',
 
 setup(
     name='geodrillcalc', # the name of the module
-    packages=['geodrillcalc'], # the location of the module
+    packages=find_packages(), # the location of the module
     version=0.1,
     install_requires=requirements,
     python_requires='>=3.8',
