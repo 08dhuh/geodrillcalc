@@ -62,8 +62,8 @@ def calculate_safety_margin(groundwater_depth, allowable_drawdown):
     ii. M = the larger of 10 m or [0.2 * (WD + Sw)] m
 
     Parameters:
-        groundwater_depth: (float) Depth of the groundwater table in meters (WD).
-        allowable_drawdown: (float) Allowable drawdown in meters (Sw).
+        groundwater_depth: (float) Depth of the groundwater table in metres (WD).
+        allowable_drawdown: (float) Allowable drawdown in metres (Sw).
 
     Returns:
         M: (float) The safety margin, M (m), for groundwater drawdown.

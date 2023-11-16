@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import numpy as np
-import pandas as pd
 from wellbore_dict import WellBoreDict
 from calc_pipeline import CalcPipeline
 from utils.utils import getlogger
