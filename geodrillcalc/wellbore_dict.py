@@ -7,7 +7,6 @@ logger = getlogger()
 
 
 class WellBoreDict:
-    # TODO: add casing_stages attribute
     data_param_names = [
         # ----------------input
         "casing_diameter_data",
@@ -58,8 +57,7 @@ class WellBoreDict:
         "casing_stage_data"
     ]
 
-    def __init__(self, logger=None):
-        self.logger = logger
+    def __init__(self):
         # ----------------------------------------------------------------
         self.casing_diameter_data = pd.DataFrame(
             columns=['inches', 'metres', 'recommended_bit'])
@@ -287,15 +285,15 @@ class WellBoreDict:
             return False
 
         if not isinstance(self.casing_diameter_data, pd.DataFrame) or self.casing_diameter_data.empty:
-            self.logger.error("Invalid or missing casing diameter data")
+            logger.error("Invalid or missing casing diameter data")
             return False
 
         if not isinstance(self.drilling_diameter_data, pd.DataFrame) or self.drilling_diameter_data.empty:
-            self.logger.error("Invalid or missing drilling diameter data")
+            logger.error("Invalid or missing drilling diameter data")
             return False
 
         if not isinstance(self.depth_data, pd.DataFrame) or self.depth_data.empty:
-            self.logger.error("Invalid or missing depth data")
+            logger.error("Invalid or missing depth data")
             return False
 
         if not all([
@@ -308,7 +306,7 @@ class WellBoreDict:
             self.allowable_drawdown,
             self.safety_margin
         ]):
-            self.logger.error("Invalid or missing float input data")
+            logger.error("Invalid or missing float input data")
             return False
 
         return True

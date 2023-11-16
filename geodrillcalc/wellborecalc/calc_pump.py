@@ -1,20 +1,21 @@
 #!/usr/bin/env python
-
+"""
+Stage 2. Define pump parameters
+Module responsible for defining pump parameters
+"""
 import numpy as np
-#import logging
-from geodrillcalc.utils.utils import getlogger
+# import logging
+from ..utils.utils import getlogger
 
 logger = getlogger()
 
-#================================================================
-# Stage 2. Define pump parameters
 
 # TODO: do we need a method for determining the safety margin?
 
 
 def assign_pump_diameter(req_flow_rate_sec,):
-                         #diameter_range=None,
-                         #flow_rate_conditions=None):
+    # diameter_range=None,
+    # flow_rate_conditions=None):
     """
     Assigns pump diameter based on the required flow rate.
 
@@ -55,6 +56,7 @@ def assign_pump_diameter(req_flow_rate_sec,):
         diameter = 12
     return diameter * inches_to_metre  # TODO: is this in inches?
 
+
 def calculate_safety_margin(groundwater_depth, allowable_drawdown):
     """
     Calculates the safety margin, M (m), for groundwater drawdown.
@@ -74,6 +76,7 @@ def calculate_safety_margin(groundwater_depth, allowable_drawdown):
       of the groundwater depth (WD) and allowable drawdown (Sw).
     """
     return max(10, 0.2 * (groundwater_depth + allowable_drawdown))
+
 
 def calculate_pump_inlet_depth(groundwater_depth, allowable_drawdown, safety_margin, long_term_decline_rate, bore_lifetime):
     """
@@ -103,7 +106,8 @@ def calculate_pump_inlet_depth(groundwater_depth, allowable_drawdown, safety_mar
     # Inlet or chamber
     # Water depth WD, drawdown, margin, dS/dt, lifetime years
     # Next step in 2-b
-    pump_inlet_depth = groundwater_depth + allowable_drawdown + safety_margin + long_term_decline_rate * bore_lifetime
+    pump_inlet_depth = groundwater_depth + allowable_drawdown + \
+        safety_margin + long_term_decline_rate * bore_lifetime
     return pump_inlet_depth
 
 

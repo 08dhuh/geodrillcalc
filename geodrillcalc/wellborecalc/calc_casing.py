@@ -1,19 +1,18 @@
 #!/usr/bin/env python
-
-import numpy as np
 import math
-#import logging
-from geodrillcalc.utils.utils import getlogger, find_next_largest_value
+import numpy as np
+from ..utils.utils import getlogger, find_next_largest_value
 
 logger = getlogger()
 
-#================================================================
+# ================================================================
 # Stage 3. Determine parameters for each casing state
 
-#TODO: needs to read stratigraphic depths
-#TODO: calculate_pre_collar_casing_diameter might need change later
-#TODO: needs to query PCD corresponding to the smallest total tubing surface area
-#TODO: in calculation pipeline, make sure to query the smallest production casing
+# TODO: needs to read stratigraphic depths
+# TODO: calculate_pre_collar_casing_diameter might need change later
+# TODO: needs to query PCD corresponding to the smallest total tubing surface area
+# TODO: in calculation pipeline, make sure to query the smallest production casing
+
 
 def calculate_pre_collar_depths(depth_to_aquifer_base, pre_collar_top=0):
     """
@@ -38,7 +37,6 @@ def calculate_pre_collar_depths(depth_to_aquifer_base, pre_collar_top=0):
         pre_collar_depth = 6 * math.floor(1 + depth_to_aquifer_base * 11/6)
     else:
         pre_collar_depth = 12
-
     pre_collar_bottom = pre_collar_top + pre_collar_depth
     return [pre_collar_top, pre_collar_bottom]
 
@@ -74,8 +72,10 @@ def is_superficial_casing_required(depth_to_aquifer_base) -> bool:
 
     """
     required = depth_to_aquifer_base > 21.8
-    logger.debug(f"Superficial casing is {'not ' if not required else ''}required")
+    logger.debug(
+        f"Superficial casing is {'not ' if not required else ''}required")
     return required
+
 
 def calculate_superficial_casing_depths(is_superficial_casing_required: bool, depth_to_aquifer_base=None, top=0):
     """
@@ -103,8 +103,8 @@ def calculate_superficial_casing_depths(is_superficial_casing_required: bool, de
     if is_superficial_casing_required:
         bottom = 1.1 * (depth_to_aquifer_base + 5)
         return [top, top + bottom]
-    else:
-        return [np.nan, np.nan]  # Not required
+    return [np.nan, np.nan]  # Not required
+
 
 def calculate_pump_chamber_depths(is_pump_chamber_required: bool, pump_inlet_depth=None, top=0):
     """
@@ -134,8 +134,8 @@ def calculate_pump_chamber_depths(is_pump_chamber_required: bool, pump_inlet_dep
     return [np.nan, np.nan]
 
 
-def calculate_intermediate_casing_diameter(screen_diameter, 
-                                           smallest_production_casing_diameter, 
+def calculate_intermediate_casing_diameter(screen_diameter,
+                                           smallest_production_casing_diameter,
                                            casing_diameter_data):
     """
     Calculates the intermediate casing diameter based on the given parameters.
@@ -156,8 +156,10 @@ def calculate_intermediate_casing_diameter(screen_diameter,
     - The intermediate casing diameter is determined as the maximum value between the next largest casing diameter and the smallest production casing diameter.
 
     """
-    intermediate_casing_diameter = max(find_next_largest_value(screen_diameter, casing_diameter_data), smallest_production_casing_diameter)
+    intermediate_casing_diameter = max(find_next_largest_value(
+        screen_diameter, casing_diameter_data), smallest_production_casing_diameter)
     return intermediate_casing_diameter
+
 
 def is_separate_pump_chamber_required(is_production_well, intermediate_casing_diameter=None, minimum_pump_housing_diameter=None):
     """
@@ -180,7 +182,8 @@ def is_separate_pump_chamber_required(is_production_well, intermediate_casing_di
 
     """
     try:
-        required = is_production_well and (minimum_pump_housing_diameter > intermediate_casing_diameter)
+        required = is_production_well and (
+            minimum_pump_housing_diameter > intermediate_casing_diameter)
         return required
     except (TypeError, ValueError) as e:
         logger.exception(e)
@@ -203,7 +206,8 @@ def calculate_pump_chamber_diameter(minumum_pump_housing_diameter, casing_diamet
     - This function calculates the pump chamber diameter by finding the next largest value in the array of nominal casing diameters.
 
     """
-    pump_chamber_diameter = find_next_largest_value(minumum_pump_housing_diameter, casing_diameter_data)
+    pump_chamber_diameter = find_next_largest_value(
+        minumum_pump_housing_diameter, casing_diameter_data)
     return pump_chamber_diameter
 
 
@@ -229,7 +233,8 @@ def calculate_intermediate_casing_depths(depth_to_top_screen, is_separate_pump_c
     """
     if intermediate_casing_top is None:
         if is_separate_pump_chamber_required:
-            raise ValueError('Pump chamber required. Please pass pump inlet depth as the intermediate_casing_top argument')
+            raise ValueError(
+                'Pump chamber required. Please pass pump inlet depth as the intermediate_casing_top argument')
         else:
             intermediate_casing_top = 0
 
@@ -252,6 +257,7 @@ def calculate_screen_riser_depths(depth_to_top_screen):
     """
     return [depth_to_top_screen - 20, depth_to_top_screen]
 
+
 def calculate_screen_riser_diameter(screen_diameter):
     """
     Returns the diameter of the screen riser.
@@ -265,6 +271,7 @@ def calculate_screen_riser_diameter(screen_diameter):
 
     """
     return screen_diameter
+
 
 def calculate_superficial_casing_diameter(is_superficial_casing_required, diameter=None, casing_diameter_data=None):
     """
@@ -290,12 +297,12 @@ def calculate_superficial_casing_diameter(is_superficial_casing_required, diamet
     """
     if is_superficial_casing_required:
         return find_next_largest_value(diameter, casing_diameter_data)
-    else:
-        return np.nan
+    return np.nan
 
-def calculate_drill_bit_diameter(casing_stage_diameter: float, 
+
+def calculate_drill_bit_diameter(casing_stage_diameter: float,
                                  casing_dataframe,
-                                 casing_recommended_bit_columns=['metres','recommended_bit']):
+                                 casing_recommended_bit_columns=['metres', 'recommended_bit']):
     """
     Calculates the recommended drill bit diameter based on the casing stage diameter.
 
@@ -314,12 +321,14 @@ def calculate_drill_bit_diameter(casing_stage_diameter: float,
 
     """
     col1, col2 = casing_recommended_bit_columns
-    value = casing_dataframe.loc[casing_dataframe[col1] == casing_stage_diameter][col2].values
+    value = casing_dataframe.loc[casing_dataframe[col1]
+                                 == casing_stage_diameter][col2].values
     if len(value) > 0:
         return value[0]
-    else:
-        logger.error("Missing or non-matching values. Check arguments of calculate_drill_bit_diameter")
-        return np.nan
+    logger.error(
+        "Missing or non-matching values. Check arguments of calculate_drill_bit_diameter")
+    return np.nan
+
 
 def calculate_screen_depths(depth_to_top_screen, screen_length, aquifer_thickness):
     """
@@ -339,10 +348,9 @@ def calculate_screen_depths(depth_to_top_screen, screen_length, aquifer_thicknes
     - It checks whether the screen length is larger than the aquifer thickness and raises an error if the condition is not met.
 
     """
-    try:
-        if aquifer_thickness < screen_length:
-            raise ValueError("aquifer thickness should be smaller than the screen length")
-        return [depth_to_top_screen, round(depth_to_top_screen + screen_length)]
-    except ValueError as e:
-         return [depth_to_top_screen, np.nan]
 
+    if aquifer_thickness < screen_length:
+        logger.warning(
+            "aquifer thickness should be smaller than the screen length")
+        return [depth_to_top_screen, np.nan]
+    return [depth_to_top_screen, round(depth_to_top_screen + screen_length)]
