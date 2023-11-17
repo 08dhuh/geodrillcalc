@@ -57,5 +57,7 @@ def test_pipeline():
     wbd = gci.calculate_and_return_wellbore_parameters(True,
                                                        depth_data,
                                                        initial_values)
+    jsonstr = wbd.export_results_to_json_string()
     assert wbd.is_initialised
     assert wbd.calculation_completed
+    assert type(jsonstr) is str

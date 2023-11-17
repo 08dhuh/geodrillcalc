@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 This module defines a class, GeoDrillCalcInterface, that serves as an interface
-for calculating wellbore parameters. It utilizes the WellBoreDict class for managing
+for calculating wellbore parameters. It utilises the WellBoreDict class for managing
 wellbore data and the CalcPipeline class for performing wellbore calculations.
 
 Example Usage:
@@ -19,7 +19,6 @@ when using the 'calculate_and_return_wellbore_parameters' method.
 from .wellbore_dict import WellBoreDict
 from .calc_pipeline import CalcPipeline
 from .utils.utils import getlogger
-
 
 class GeoDrillCalcInterface:
     """
@@ -154,3 +153,23 @@ class GeoDrillCalcInterface:
         Sets the logging level of current instance's logger.
         """
         self.logger.setLevel(loglevel)
+
+    def export_results_to_json_file(self, path:str):
+        """
+        Writes the output as json file to the given path
+
+        Parameters
+            path : str
+        """
+        json_result = self.wbd.export_results_to_json_string()
+        with open(path, 'w') as f:
+            f.write(json_result)
+    
+    def export_results_to_dict(self):
+        """
+        Retrieves the results from the instance's WellBoreDict attribute
+        """
+        return self.wbd.export_results_to_dict()
+    
+
+

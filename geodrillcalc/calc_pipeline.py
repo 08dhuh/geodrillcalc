@@ -5,8 +5,6 @@ from .wellbore_dict import WellBoreDict
 from .wellborecalc import calc_casing as cc, calc_interval as ci, calc_pump as cp
 from .utils.utils import getlogger, find_next_largest_value
 
-logger = getlogger()
-
 
 class CalcPipeline:
     """
@@ -40,21 +38,28 @@ class CalcPipeline:
     calc_injectionpipe.calc_pipeline(is_production_pump=True)
     """
 
-    def __init__(self, wellboredict: WellBoreDict):
+    def __init__(self, wellboredict: WellBoreDict, logger=None):
         self.wbd = wellboredict  # wellboredict must be a fully initialised instance
         self.casing_diameters_in_metres = self.wbd.get_casing_diameters()
         self.drilling_diameters_in_metres = self.wbd.get_drilling_diameters()
+        self.logger = logger or getlogger()
 
     def calc_pipeline(self, is_production_pump):
+        logger = self.logger
         try:
+            setattr(self.wbd,'calculation_completed',False)            
             self._interval_pipeline()
             self._pump_pipeline()
             self._casing_pipeline(is_production_pump)
-            self.wbd.calculation_completed = True
+            setattr(self.wbd,'calculation_completed',True)
+            #self.wbd.calculation_completed = True
         except ValueError as e:
             logger.error(f"An error occurred during calculation: {str(e)}")
             raise ValueError from e
-
+        except ZeroDivisionError as e:
+            logger.error(f"Zero division error occurred in interval calculations: {str(e)}")
+            raise ValueError from e
+        
     def _interval_pipeline(self):
         """
         Determines and updates WellboreDict instance Interval parameters
@@ -160,6 +165,7 @@ class CalcPipeline:
                          "production_screen"]
         """
         wbd = self.wbd
+        logger = self.logger
         casing_stage_data = wbd.casing_stage_data.copy().drop(
             ['drill_bit'], axis=1)
         # print(casing_stage_data)

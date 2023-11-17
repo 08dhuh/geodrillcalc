@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 import numpy as np
 import pandas as pd
+import json
 from .utils.utils import getlogger, validate
-
-logger = getlogger()
 
 
 class WellBoreDict:
+    """
+    
+    """
     data_param_names = [
         # ----------------input
         "casing_diameter_data",
@@ -57,7 +59,7 @@ class WellBoreDict:
         "casing_stage_data"
     ]
 
-    def __init__(self):
+    def __init__(self, logger=None):
         # ----------------------------------------------------------------
         self.casing_diameter_data = pd.DataFrame(
             columns=['inches', 'metres', 'recommended_bit'])
@@ -106,6 +108,8 @@ class WellBoreDict:
         # ----------------------------------------------------------------
         self.is_initialised = False
         self.calculation_completed = False
+        #----------------------------------------------------------------
+        self.logger = logger or getlogger()
 
     def _set_diameter_data(self,
                           casing_diameter_data=None,
@@ -131,7 +135,7 @@ class WellBoreDict:
             try:
                 depth_data_pd = pd.DataFrame(depth_data)
             except ValueError as e:
-                logger.error(e)
+                self.logger.error(e)
         else:
             depth_data_pd = depth_data.copy()
         columns = ["aquifer_layer", "is_aquifer", "depth_to_base"]
@@ -139,11 +143,12 @@ class WellBoreDict:
         self.depth_data = depth_data_pd.set_index(
             "aquifer_layer")
 
-    def set_params(self, arg_names, **kwargs):
+    def set_params(self, arg_names:list, **kwargs):
         for arg_name in arg_names:
             value = kwargs.get(arg_name)
             if value is not None:
                 setattr(self, arg_name, value)
+
 
     # def set_is_production(self, is_production):
     #     self.is_production = is_production
@@ -272,7 +277,7 @@ class WellBoreDict:
         for arg in self.data_param_names:
             value = getattr(self, arg)
             if validate(value, lambda x: not isinstance(x, pd.DataFrame) or x.empty):
-                logger.critical('validate_data failed')
+                self.logger.critical('validate_data failed')
                 return False
         return True
 
@@ -285,15 +290,15 @@ class WellBoreDict:
             return False
 
         if not isinstance(self.casing_diameter_data, pd.DataFrame) or self.casing_diameter_data.empty:
-            logger.error("Invalid or missing casing diameter data")
+            self.logger.error("Invalid or missing casing diameter data")
             return False
 
         if not isinstance(self.drilling_diameter_data, pd.DataFrame) or self.drilling_diameter_data.empty:
-            logger.error("Invalid or missing drilling diameter data")
+            self.logger.error("Invalid or missing drilling diameter data")
             return False
 
         if not isinstance(self.depth_data, pd.DataFrame) or self.depth_data.empty:
-            logger.error("Invalid or missing depth data")
+            self.logger.error("Invalid or missing depth data")
             return False
 
         if not all([
@@ -306,7 +311,34 @@ class WellBoreDict:
             self.allowable_drawdown,
             self.safety_margin
         ]):
-            logger.error("Invalid or missing float input data")
+            self.logger.error("Invalid or missing float input data")
             return False
 
         return True
+
+    def export_results_to_dict(self,to_json=False):
+        """
+        Export the results of the pipeline as a Python dict object
+
+        Parameters:
+            to_json: if set to True, stores the pd.DataFrame item as a json string
+        """
+        if not self.calculation_completed:
+            self.logger.critical('Unfinished pipeline')
+            return
+        results = {}
+        for key in self.outcome_params:
+            value = getattr(self, key)
+            if isinstance(value, pd.DataFrame) and to_json:
+                results[key] = value.to_json()            
+            else:
+                results[key] = value
+        return results
+
+    def export_results_to_json_string(self):
+        """
+        Export the results of the pipeline to a json format string
+        """
+        results = self.export_results_to_dict(to_json=True)
+
+        return json.dumps(results)
