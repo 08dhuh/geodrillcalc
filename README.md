@@ -1,1 +1,3 @@
-# Drilling Cost Calculation
+# GeoDrillCalc - Geothermal Wellbore Parameter Modeling Calculator
+
+
