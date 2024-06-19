@@ -148,7 +148,7 @@ class GeoDrillCalcInterface:
             value = getattr(self.wbd, key)
             self.logger.info(f"{key}: {value}")
 
-    def set_loglevel(self, loglevel: int or str):
+    def set_loglevel(self, loglevel: int | str):
         """
         Sets the logging level of current instance's logger.
         """

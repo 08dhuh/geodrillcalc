@@ -329,10 +329,13 @@ class WellBoreDict:
         results = {}
         for key in self.outcome_params:
             value = getattr(self, key)
-            if isinstance(value, pd.DataFrame) and to_json:
-                results[key] = value.to_json()            
-            else:
-                results[key] = value
+            if isinstance(value, pd.DataFrame):
+                #json compatible
+                value = value.replace(np.nan, None)
+                if to_json:
+                    results[key] = value.to_json()
+                    continue           
+            results[key] = value
         return results
 
     def export_results_to_json_string(self):

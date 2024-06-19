@@ -61,3 +61,5 @@ def test_pipeline():
     assert wbd.is_initialised
     assert wbd.calculation_completed
     assert type(jsonstr) is str
+
+
