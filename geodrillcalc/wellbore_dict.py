@@ -4,7 +4,8 @@ import pandas as pd
 import json
 from .utils.utils import getlogger, validate
 
-
+#TODO: Add target aquiter to the initialise_and_validate_input_data
+#TODO: modify 
 class WellBoreDict:
     """
     
@@ -27,7 +28,7 @@ class WellBoreDict:
         "groundwater_depth",
         "long_term_decline_rate",
         "allowable_drawdown",
-        "safety_margin",
+        "safety_margin",        
         # Below are derived from the above parameters
         "depth_to_top_screen",
         "required_flow_rate_per_litre_sec",
@@ -40,7 +41,10 @@ class WellBoreDict:
         "sand_face_velocity_injection",
         "net_to_gross_ratio_aquifer",
         "aquifer_average_porosity",
-        "pipe_roughness_coeff"
+        "pipe_roughness_coeff",
+        # added inputs
+        "top_aquifer_layer",
+        "target_aquifer_layer",
     ]
 
     outcome_params = [
@@ -69,6 +73,7 @@ class WellBoreDict:
         self.depth_data = pd.DataFrame(
             columns=["aquifer_layer", "is_aquifer", "depth_to_base"])
         # ----------------------------------------------------------------
+        #input parameters
         self.required_flow_rate = None
         self.hydraulic_conductivity = None
         self.average_porosity = None
@@ -76,8 +81,9 @@ class WellBoreDict:
         self.groundwater_depth = None
         self.long_term_decline_rate = None
         self.allowable_drawdown = None
-        self.safety_margin = None
+        self.safety_margin = None        
         # ----------------------------------------------------------------
+        #inferred from input parameters
         self.required_flow_rate_per_litre_sec = None
         self.required_flow_rate_per_m3_sec = None
         self.bore_lifetime_per_day = None
@@ -85,12 +91,14 @@ class WellBoreDict:
         self.aquifer_thickness = None
         self.depth_to_aquifer_base = None
         # ----------------------------------------------------------------
+        #constants
         self.sand_face_velocity_production = .01
         self.sand_face_velocity_injection = .003
         self.net_to_gross_ratio_aquifer = 1
         self.aquifer_average_porosity = .25
         self.pipe_roughness_coeff = 100
         # ----------------------------------------------------------------
+        #result stage
         self.production_screen_length = None
         self.injection_screen_length = None
         self.production_screen_length_error = None
@@ -103,6 +111,7 @@ class WellBoreDict:
         self.minimum_pump_housing_diameter = None
         self.min_total_casing_production_screen_diameter = None
         # ----------------------------------------------------------------
+        #result dataframe
         self.interval_stage_data = None
         self.casing_stage_data = self._initialise_casing_stage_data()
         # ----------------------------------------------------------------
@@ -110,6 +119,10 @@ class WellBoreDict:
         self.calculation_completed = False
         #----------------------------------------------------------------
         self.logger = logger or getlogger()
+        # ----------------------------------------------------------------
+        # input added
+        self.top_aquifer_layer = None
+        self.target_aquifer_layer = None
 
     def _set_diameter_data(self,
                           casing_diameter_data=None,
@@ -141,13 +154,15 @@ class WellBoreDict:
         columns = ["aquifer_layer", "is_aquifer", "depth_to_base"]
         depth_data_pd.columns = columns
         self.depth_data = depth_data_pd.set_index(
-            "aquifer_layer")
+            "aquifer_layer") #index as the aquifer code
 
     def set_params(self, arg_names:list, **kwargs):
         for arg_name in arg_names:
             value = kwargs.get(arg_name)
             if value is not None:
                 setattr(self, arg_name, value)
+            else:
+                raise ValueError(f'{value} is set to None')
 
 
     # def set_is_production(self, is_production):
@@ -190,6 +205,7 @@ class WellBoreDict:
                                  columns=casing_columns).set_index(pd.Index(casing_stages, name='casing_stages'))
         return casing_df
 
+    #TODO: The method directly accesses specific layers (LMTA, LTA, QA_UTQA) using .loc.
     def initialise_and_validate_input_data(self, **kwargs):
         """
         Initialises the WellboreDict instance with the provided depth data and initial parameters
@@ -207,6 +223,7 @@ class WellBoreDict:
         
         Example Usage:
             depth_data = {
+            #TODO: modify aquifer_layer to conform to VAF code
                 "aquifer_layer": [
                     "QA_UTQA",
                     "UTQD",
@@ -251,6 +268,9 @@ class WellBoreDict:
                 "long_term_decline_rate": 1,
                 "allowable_drawdown": 25,
                 "safety_margin": 25
+                #TODO: add target_aquifer to the list
+                "target_aquifer_layer": "109lmta",
+                "top_aquifer_layer": "102utb"
             }
         
         wbd = WellBoreDict()
@@ -265,10 +285,25 @@ class WellBoreDict:
         self.required_flow_rate_per_m3_sec = self.required_flow_rate / 86400
         self.bore_lifetime_per_day = self.bore_lifetime_year * 365
 
-        self.depth_to_top_screen = self.depth_data.loc['LMTA']['depth_to_base']
-        self.aquifer_thickness = self.depth_data.loc['LTA']['depth_to_base'] - \
+        #self.depth_to_top_screen = self.depth_data.loc['LMTA']['depth_to_base']
+        #self.aquifer_thickness = self.depth_data.iloc['LTA']['depth_to_base'] - \
+            #self.depth_to_top_screen
+        #self.depth_to_aquifer_base = self.depth_data.loc['QA_UTQA']['depth_to_base']
+        
+        if self.target_aquifer_layer not in self.depth_data.index:
+            raise ValueError(f'{self.target_aquifer_layer} not present in the dataframe')
+        target_index = self.depth_data.index.get_loc(self.target_aquifer_layer)        
+        if target_index >= len(self.depth_data.index) - 1:
+            raise ValueError(f"Target aquifer '{self.target_aquifer_layer}' is the bottommost layer, which is not allowed.")
+        
+        self.depth_to_top_screen = self.depth_data.loc[self.target_aquifer_layer]['depth_to_base']
+        next_index = target_index + 1
+
+        self.aquifer_thickness = self.depth_data.iloc[next_index]['depth_to_base'] - \
             self.depth_to_top_screen
-        self.depth_to_aquifer_base = self.depth_data.loc['QA_UTQA']['depth_to_base']
+        self.depth_to_aquifer_base = self.depth_data.loc[self.top_aquifer_layer]['depth_to_base']
+        
+        
         self.is_initialised = True
 
         self._validate_initial_inputs()
