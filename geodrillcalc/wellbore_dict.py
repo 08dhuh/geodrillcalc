@@ -20,7 +20,7 @@ class WellBoreDict:
         "casing_stage_data"
     ]
 
-    initial_param_names = [
+    initial_param_names = [        
         "required_flow_rate",
         "hydraulic_conductivity",
         "average_porosity",
@@ -28,7 +28,10 @@ class WellBoreDict:
         "groundwater_depth",
         "long_term_decline_rate",
         "allowable_drawdown",
-        "safety_margin",        
+        "safety_margin",                
+        # added inputs
+        "top_aquifer_layer",
+        "target_aquifer_layer",      
         # Below are derived from the above parameters
         "depth_to_top_screen",
         "required_flow_rate_per_litre_sec",
@@ -42,9 +45,7 @@ class WellBoreDict:
         "net_to_gross_ratio_aquifer",
         "aquifer_average_porosity",
         "pipe_roughness_coeff",
-        # added inputs
-        "top_aquifer_layer",
-        "target_aquifer_layer",
+        
     ]
 
     outcome_params = [
@@ -162,7 +163,7 @@ class WellBoreDict:
             if value is not None:
                 setattr(self, arg_name, value)
             else:
-                raise ValueError(f'{value} is set to None')
+                raise ValueError(f'{arg_name} is set to None')
 
 
     # def set_is_production(self, is_production):
