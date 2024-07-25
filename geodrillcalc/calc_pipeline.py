@@ -131,7 +131,7 @@ class CalcPipeline:
         ir['injection_screen_diameter'] = \
             wbd.drilling_diameter_data.loc[wbd.drilling_diameter_data['metres']
                                            == ir['injection_open_hole_diameter']]['recommended_screen'].iloc[0]
-        wbd.set_params(ir.keys(), **ir)
+        wbd.assign_input_params(ir.keys(), **ir)
         # for key, value in ir.items():
         #     print(f"{key}: {value}")
         setattr(self.wbd, 'interval_stage_data', interval_df)
@@ -151,7 +151,7 @@ class CalcPipeline:
             cp.calculate_minimum_pump_housing_diameter(wbd.required_flow_rate_per_m3_sec,
                                                        pump_diameter
                                                        )
-        wbd.set_params(pr.keys(), **pr)
+        wbd.assign_input_params(pr.keys(), **pr)
         # for key, value in pr.items():
         #     print(f"{key}: {value}")
 

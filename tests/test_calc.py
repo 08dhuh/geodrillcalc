@@ -6,17 +6,18 @@ def test_imports():
 
 def test_pipeline():
     import geodrillcalc.geodrillcalc as gdc
+    import geodrillcalc.wellbore_dict as wbdict
     depth_data = {
         "aquifer_layer": [
-            "QA_UTQA",
-            "UTQD",
-            "UTAF",
-            "UTD",
-            "UMTA",
-            "UMTD",
-            "LMTA",
-            "LTA",
-            "BSE"
+            '100qa',
+            '103utqd',
+            '105utaf',
+            '106utd',
+            '107umta',
+            '108umtd',
+            '109lmta',
+            '111lta',
+            '114bse'
         ],
         "is_aquifer": [
             True,
@@ -50,7 +51,9 @@ def test_pipeline():
         "groundwater_depth": 25,
         "long_term_decline_rate": 1,
         "allowable_drawdown": 25,
-        "safety_margin": 25
+        "safety_margin": 25,
+        "target_aquifer_layer": "109lmta",
+        "top_aquifer_layer": "100qa"
     }
 
     gci = gdc.GeoDrillCalcInterface()
