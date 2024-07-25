@@ -98,7 +98,7 @@ def calculate_minimum_screen_length(req_flow_rate: float,
 
 def calculate_casing_friction(depth_to_top_screen: float,
                               req_flow_rate: float,
-                              casing_diameter: float | np.ndarray,
+                              casing_diameter: float or np.ndarray,
                               pipe_roughness_coeff: float = 100.):
     """
     Estimates production casing friction loss above aquifer
