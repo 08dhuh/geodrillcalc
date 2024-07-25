@@ -78,15 +78,15 @@ class GeoDrillCalcInterface:
             Make sure the inputs follow the format below:
                 depth_data = {
                     "aquifer_layer": [
-                        "QA_UTQA",
-                        "UTQD",
-                        "UTAF",
-                        "UTD",
-                        "UMTA",
-                        "UMTD",
-                        "LMTA",
-                        "LTA",
-                        "BSE"
+                        '100qa',
+                        '103utqd',
+                        '105utaf',
+                        '106utd',
+                        '107umta',
+                        '108umtd',
+                        '109lmta',
+                        '111lta',
+                        '114bse'
                     ],
                     "is_aquifer": [
                         True,
@@ -120,7 +120,9 @@ class GeoDrillCalcInterface:
                     "groundwater_depth": 25,
                     "long_term_decline_rate": 1,
                     "allowable_drawdown": 25,
-                    "safety_margin": 25
+                    "safety_margin": 25,
+                    "target_aquifer_layer": "109lmta",
+                    "top_aquifer_layer": "100qa"
                 }
         """
         self._initialise(depth_data, initial_input_data)

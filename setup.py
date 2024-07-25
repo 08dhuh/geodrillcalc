@@ -27,7 +27,7 @@ requirements = ['numpy>=1.0',
 setup(
     name='geodrillcalc', # the name of the module
     packages=find_packages(), # the location of the module
-    version=0.2,
+    version=0.3,
     install_requires=requirements,
     python_requires='>=3.8',
 )
