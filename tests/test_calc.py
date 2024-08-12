@@ -3,6 +3,10 @@
 def test_imports():
     import geodrillcalc.geodrillcalc as gdc
 
+def debug_pipeline():
+    import geodrillcalc.geodrillcalc as gdc
+    depth_data = {'aquifer_layer': ['102utqa', '111lta', '114bse'], 'is_aquifer': [True, True, False], 'depth_to_base': [47.0, 507.0, 807.0]}
+
 
 def test_pipeline():
     import geodrillcalc.geodrillcalc as gdc
