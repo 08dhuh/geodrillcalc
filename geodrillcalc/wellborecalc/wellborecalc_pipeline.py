@@ -84,7 +84,7 @@ class CalcPipeline:
     wbd.initialise_and_validate_input_params(aquifer_layer_table=aquifer_layer_table, **initial_values)  
     
     calc_injectionpipe = CalcPipeline(wbd)
-    calc_injectionpipe.calc_pipeline(is_production_pump=True)
+    calc_injectionpipe.calc_pipeline(is_production_well=True)
     """
 
     def __init__(self, wellboredict: WellBoreDict, logger=None):
@@ -93,13 +93,13 @@ class CalcPipeline:
         self.drilling_diameters_in_metres = self.wbd.get_drilling_diameters()
         self.logger = logger or getlogger()
 
-    def calc_pipeline(self, is_production_pump):
+    def calc_pipeline(self, is_production_well):
         logger = self.logger
         try:
             setattr(self.wbd,'calculation_completed',False)            
             self._screen_pipeline()
             self._pump_pipeline()
-            self._casing_pipeline(is_production_pump)
+            self._casing_pipeline(is_production_well)
             setattr(self.wbd,'calculation_completed',True)
             #self.wbd.calculation_completed = True
         except ValueError as e:
@@ -124,13 +124,13 @@ class CalcPipeline:
                                                wbd.hydraulic_conductivity,
                                                wbd.bore_lifetime_per_day,
                                                wbd.aquifer_thickness,
-                                               False)
+                                               is_production_well=True)
         ir['injection_screen_length'], ir['injection_screen_length_error'] = \
             ci.calculate_minimum_screen_length(wbd.required_flow_rate,
                                                wbd.hydraulic_conductivity,
                                                wbd.bore_lifetime_per_day,
                                                wbd.aquifer_thickness,
-                                               True)
+                                               is_production_well=False)
         screen_df['casing_frictions'] = \
             ci.calculate_casing_friction(wbd.depth_to_top_screen,
                                          wbd.required_flow_rate_per_m3_sec,
@@ -204,7 +204,7 @@ class CalcPipeline:
         # for key, value in pr.items():
         #     print(f"{key}: {value}")
 
-    def _casing_pipeline(self, is_production_pump):
+    def _casing_pipeline(self, is_production_well):
         """
         casing_stages = ["pre_collar",
                          "superficial_casing",
@@ -218,9 +218,9 @@ class CalcPipeline:
         casing_stage_table = wbd.casing_stage_table.copy().drop(
             ['drill_bit'], axis=1)
         # print(casing_stage_table)
-        screen_diameter = wbd.production_screen_diameter if is_production_pump \
+        screen_diameter = wbd.production_screen_diameter if is_production_well \
             else wbd.injection_screen_diameter
-        screen_length = wbd.production_screen_length if is_production_pump \
+        screen_length = wbd.production_screen_length if is_production_well \
             else wbd.injection_screen_length
         # ------pre-collar
         pre_collar = [

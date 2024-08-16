@@ -65,6 +65,8 @@ def test_pipeline():
                                                        aquifer_layer_table,
                                                        initial_values)
     jsonstr = wbd.export_results_to_json_string()
+    result = wbd.export_results_to_dict()
+    print(result)
     assert wbd.is_initialised
     assert wbd.calculation_completed
     assert type(jsonstr) is str

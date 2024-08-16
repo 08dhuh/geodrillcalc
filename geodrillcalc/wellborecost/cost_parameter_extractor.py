@@ -7,9 +7,9 @@ class CostParameterExtractor:
 
     def __init__(self,
                  wbd: WellBoreDict,
-                 is_production_pump: bool) -> None:
+                 is_production_well: bool) -> None:
         self.wbd = wbd
-        self.is_production_pump = is_production_pump
+        self.is_production_well = is_production_well
         self.logger = getlogger()
 
     # step 1. drilling rates

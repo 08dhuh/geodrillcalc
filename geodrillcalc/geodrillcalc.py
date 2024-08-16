@@ -8,7 +8,7 @@ Example Usage:
     geo_interface = GeoDrillCalcInterface()
 
     result_wbd = geo_interface.calculate_and_return_wellbore_parameters(
-        is_production_pump=True,
+        is_production_well=True,
         aquifer_layer_table=aquifer_layer_table,
         initial_input_params=initial_values
     )
@@ -27,7 +27,7 @@ class GeoDrillCalcInterface:
     Attributes:
     - wbd: An instance of the WellBoreDict class for managing wellbore data.
     - cpl: An instance of the CalcPipeline class for performing wellbore calculations.
-    - is_production_pump: A boolean indicating whether the pump used is for production or injection.
+    - is_production_well: A boolean indicating whether the pump used is for production or injection.
     - logger: A logger for handling log messages in the GeoDrillCalcInterface class.
 
     Methods:
@@ -43,7 +43,7 @@ class GeoDrillCalcInterface:
     geo_interface = GeoDrillCalcInterface()
 
     result_wbd = geo_interface.calculate_and_return_wellbore_parameters(
-        is_production_pump=True,
+        is_production_well=True,
         aquifer_layer_table=aquifer_layer_table,
         initial_input_params=initial_values
     )
@@ -52,14 +52,14 @@ class GeoDrillCalcInterface:
     when using the 'calculate_and_return_wellbore_parameters' method.
     """
 
-    def __init__(self, is_production_pump: bool = None):
+    def __init__(self, is_production_well: bool = None, log_level='INFO'):
         self.wbd = None
         self.cpl = None
-        self.is_production_pump = is_production_pump or None
-        self.logger = getlogger()
+        self.is_production_well = is_production_well or None
+        self.logger = getlogger(log_level)
 
     def calculate_and_return_wellbore_parameters(self,
-                                                 is_production_pump: bool,
+                                                 is_production_well: bool,
                                                  aquifer_layer_table,
                                                  initial_input_params):
         """
@@ -67,7 +67,7 @@ class GeoDrillCalcInterface:
         the model parameters
 
         Parameters:
-            is_production_pump: bool
+            is_production_well: bool
             aquifer_layer_table: pd.DataFrame
             initial_input_params: dict
 
@@ -125,9 +125,11 @@ class GeoDrillCalcInterface:
                     "top_aquifer_layer": "100qa"
                 }
         """
-        self._initialise(aquifer_layer_table, initial_input_params)
+        self._initialise(aquifer_layer_table, dict({"is_production_well":is_production_well},
+                                                   **initial_input_params, 
+                                                   ))
         self.cpl = CalcPipeline(self.wbd)
-        self.cpl.calc_pipeline(is_production_pump)
+        self.cpl.calc_pipeline(is_production_well)
         self._log_outcome()
         return self.wbd
 
@@ -146,7 +148,7 @@ class GeoDrillCalcInterface:
         """
         if not self.wbd.is_initialised or not self.wbd.calculation_completed:
             return
-        for key in self.wbd.outcome_params:
+        for key in self.wbd.output_param_names:
             value = getattr(self.wbd, key)
             self.logger.info(f"{key}: {value}")
 
