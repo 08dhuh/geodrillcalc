@@ -29,10 +29,10 @@ class WellBoreDict:
     __init__(self, logger=None):
         Initializes the WellBoreDict instance with default values.
     
-    _initialise_diameter_data(self, casing_diameter_data=None, drilling_diameter_data=None):
+    _initialise_diameter_data(self, casing_diameter_table=None, drilling_diameter_table=None):
         Initializes diameter data for casing and drilling.
     
-    _initialise_depth_data(self, depth_data):
+    _initialise_aquifer_layer_table(self, aquifer_layer_table):
         Initializes depth data from a given dictionary or DataFrame.
     
     assign_input_params(self, arg_names: list, **kwargs):
@@ -65,12 +65,57 @@ class WellBoreDict:
     export_results_to_json_string(self):
         Exports the results of the wellbore calculations to a JSON string.
     """
+
+    _ATTRIBUTES = {
+        # Input data
+        "casing_diameter_table": pd.DataFrame,
+        "drilling_diameter_table": pd.DataFrame,
+        "aquifer_layer_table": pd.DataFrame,
+        # Input parameters
+        "required_flow_rate": float,
+        "hydraulic_conductivity": float,
+        "average_porosity": float,
+        "bore_lifetime_year": float,
+        "groundwater_depth": float,
+        "long_term_decline_rate": float,
+        "allowable_drawdown": float,
+        "safety_margin": float,
+        "is_production_bore": bool,
+        # Added inputs
+        "top_aquifer_layer": str,
+        "target_aquifer_layer": str,
+        # Derived parameters
+        "depth_to_top_screen": float,
+        "required_flow_rate_per_litre_sec": float,
+        "required_flow_rate_per_m3_sec": float,
+        "bore_lifetime_per_day": float,
+        "aquifer_thickness": float,
+        "depth_to_aquifer_base": float,
+        # Constants
+        "sand_face_velocity_production": float,
+        "sand_face_velocity_injection": float,
+        "net_to_gross_ratio_aquifer": float,
+        "aquifer_average_porosity": float,
+        "pipe_roughness_coeff": float,
+
+        # Output parameters
+        "screen_length": float,
+        "screen_length_error": float,
+        "min_total_casing_screen_diameter": float,
+        "screen_diameter": float,
+        "open_hole_diameter": float,
+        "pump_inlet_depth": float,
+        "minimum_pump_housing_diameter": float,
+        # Output dataframes
+        "interval_stage_data": pd.DataFrame,
+        "casing_stage_data": pd.DataFrame        
+    }
     
     data_param_names = [
         # ----------------input
-        "casing_diameter_data",
-        "drilling_diameter_data",
-        "depth_data",
+        "casing_diameter_table",
+        "drilling_diameter_table",
+        "aquifer_layer_table",
         # ----------------tbd by pipeline
         "interval_stage_data",
         "casing_stage_data"
@@ -102,7 +147,6 @@ class WellBoreDict:
         "net_to_gross_ratio_aquifer",
         "aquifer_average_porosity",
         "pipe_roughness_coeff",
-
     ]
 
     outcome_params = [
@@ -123,12 +167,12 @@ class WellBoreDict:
 
     def __init__(self, logger=None):
         # ----------------------------------------------------------------
-        self.casing_diameter_data = pd.DataFrame(
+        self.casing_diameter_table = pd.DataFrame(
             columns=['inches', 'metres', 'recommended_bit'])
-        self.drilling_diameter_data = pd.DataFrame(
+        self.drilling_diameter_table = pd.DataFrame(
             columns=['inches', 'metres', 'recommended_screen'])
 
-        self.depth_data = pd.DataFrame(
+        self.aquifer_layer_table = pd.DataFrame(
             columns=["aquifer_layer", "is_aquifer", "depth_to_base"])
         # ----------------------------------------------------------------
         # input parameters
@@ -183,15 +227,15 @@ class WellBoreDict:
         self.target_aquifer_layer = None
 
     def _initialise_diameter_data(self,
-                                  casing_diameter_data=None,
-                                  drilling_diameter_data=None,):
-        self.casing_diameter_data = casing_diameter_data or pd.DataFrame({
+                                  casing_diameter_table=None,
+                                  drilling_diameter_table=None,):
+        self.casing_diameter_table = casing_diameter_table or pd.DataFrame({
             'inches': [4, 4.5, 5, 5.5, 6.625, 7, 8.625, 9.625, 10.75, 13.375, 18.625, 20, 24, 30],
             'metres': [0.1016, 0.1143, 0.127, 0.1397, 0.168275, 0.1778, 0.219075, 0.244475, 0.27305, 0.339725, 0.473075, 0.508, 0.6096, 0.762],
             'recommended_bit': [0.190500, 0.215900, 0.215900, 0.228600, 0.269875, 0.269875, 0.311150, 0.349250, 0.381000, 0.444500, 0.609600, 0.609600, 0.711200, 0.914400]
         })
 
-        self.drilling_diameter_data = drilling_diameter_data or pd.DataFrame({
+        self.drilling_diameter_table = drilling_diameter_table or pd.DataFrame({
             'inches': [7.5, 8.5, 9, 9.5, 10.625, 11.625, 12.25, 13.75, 15, 16, 17.5, 18.5, 20, 22, 24, 26, 28, 30, 32, 34, 36],
             'metres': [0.1905, 0.2159, 0.2286, 0.2413, 0.269875, 0.295275, 0.31115, 0.34925, 0.381, 0.4064, 0.4445, 0.4699, 0.508, 0.5588, 0.6096, 0.6604, 0.7112, 0.762, 0.8128, 0.8636, 0.9144],
             'recommended_screen': [
@@ -201,17 +245,17 @@ class WellBoreDict:
             ]  # in metres
         })
 
-    def _initialise_depth_data(self, depth_data):
-        if not isinstance(depth_data, pd.DataFrame):
+    def _initialise_aquifer_layer_table(self, aquifer_layer_table):
+        if not isinstance(aquifer_layer_table, pd.DataFrame):
             try:
-                depth_data_pd = pd.DataFrame(depth_data)
+                aquifer_layer_table_pd = pd.DataFrame(aquifer_layer_table)
             except ValueError as e:
                 self.logger.error(e)
         else:
-            depth_data_pd = depth_data.copy()
+            aquifer_layer_table_pd = aquifer_layer_table.copy()
         columns = ["aquifer_layer", "is_aquifer", "depth_to_base"]
-        depth_data_pd.columns = columns
-        self.depth_data = depth_data_pd.set_index(
+        aquifer_layer_table_pd.columns = columns
+        self.aquifer_layer_table = aquifer_layer_table_pd.set_index(
             "aquifer_layer")  # index as the aquifer code
 
     def assign_input_params(self, arg_names: list, **kwargs):
@@ -225,11 +269,11 @@ class WellBoreDict:
 
     def _get_diameter_data(self, dataset, metric='metres', as_numpy=True):
         """
-        dataset: self.casing_diameter_data if 'casing' else self.drilling_diameter_data
+        dataset: self.casing_diameter_table if 'casing' else self.drilling_diameter_table
         metric: if 'metres' or 'inches', returns the corresponding column. Otherwise, returns the whole dataset
         as_numpy: if True, casts the returning dataset to numpy. This argument is ignored when metric is set to None, 
         """
-        dset = self.casing_diameter_data if dataset == 'casing' else self.drilling_diameter_data
+        dset = self.casing_diameter_table if dataset == 'casing' else self.drilling_diameter_table
         if metric is None or metric not in dset.columns:
             return dset
         diam = dset['metres'] if metric == 'metres' else dset['inches']
@@ -239,12 +283,12 @@ class WellBoreDict:
         """Returns as numpy array """
         return self._get_diameter_data(dataset='casing', metric=metric, as_numpy=as_numpy)
         # if metric == None
-        # diam = self.casing_diameter_data['metres']
+        # diam = self.casing_diameter_table['metres']
         # return np.array(diam) if as_numpy else diam
 
     def get_drilling_diameters(self, metric='metres', as_numpy=True):
         return self._get_diameter_data(dataset='drilling', metric=metric, as_numpy=as_numpy)
-        # diam = self.drilling_diameter_data['metres']
+        # diam = self.drilling_diameter_table['metres']
         # return np.array(diam) if as_numpy else diam
 
     def _initialise_casing_stage_data(self):
@@ -266,7 +310,7 @@ class WellBoreDict:
         Initialises the WellboreDict instance with the provided depth data and initial parameters
 
         Parameters:
-            "depth_data": Dictionary containing aquifer layer information. Refer to the example usage below for api
+            "aquifer_layer_table": Dictionary containing aquifer layer information. Refer to the example usage below for api
             "required_flow_rate": Required flow rate in cubic metres per second (m^3/s).
             "hydraulic_conductivity": Aquifer hydraulic conductivity, K (m/day),
             "average_porosity": average reservoir porosity (0–1),
@@ -279,7 +323,7 @@ class WellBoreDict:
             "top_aquifer_layer": Top aquifer layer (qa or utqa)"
 
         Example Usage:
-            depth_data = {
+            aquifer_layer_table = {
         "aquifer_layer": [
             '100qa',
             '103utqd',
@@ -329,11 +373,11 @@ class WellBoreDict:
     }
 
         wbd = WellBoreDict()
-        wbd.initialise(depth_data=depth_data, **initial_values)
+        wbd.initialise(aquifer_layer_table=aquifer_layer_table, **initial_values)
 
         """
         self._initialise_diameter_data()
-        self._initialise_depth_data(kwargs.get('depth_data'))
+        self._initialise_aquifer_layer_table(kwargs.get('aquifer_layer_table'))
         self.assign_input_params(self.initial_param_names, **kwargs)
 
         self.required_flow_rate_per_litre_sec = self.required_flow_rate / 86.4
@@ -341,28 +385,28 @@ class WellBoreDict:
         self.bore_lifetime_per_day = self.bore_lifetime_year * 365
 
 
-        if self.target_aquifer_layer not in self.depth_data.index:
+        if self.target_aquifer_layer not in self.aquifer_layer_table.index:
             raise ValueError(
                 f'Target aquifer: {self.target_aquifer_layer} not present in the dataframe')
-        target_index = self.depth_data.index.get_loc(self.target_aquifer_layer)
-        if target_index >= len(self.depth_data.index) - 1: 
+        target_index = self.aquifer_layer_table.index.get_loc(self.target_aquifer_layer)
+        if target_index >= len(self.aquifer_layer_table.index) - 1: 
             raise ValueError(
                 f"Target aquifer '{self.target_aquifer_layer}' is the bottommost layer, which is not allowed.")
 
-        self.depth_to_top_screen = self.depth_data.loc[self.target_aquifer_layer]['depth_to_base']
+        self.depth_to_top_screen = self.aquifer_layer_table.loc[self.target_aquifer_layer]['depth_to_base']
         next_index = target_index + 1
 
-        self.aquifer_thickness = self.depth_data.iloc[next_index]['depth_to_base'] - \
+        self.aquifer_thickness = self.aquifer_layer_table.iloc[next_index]['depth_to_base'] - \
             self.depth_to_top_screen
         
-        if self.top_aquifer_layer not in self.depth_data.index: 
+        if self.top_aquifer_layer not in self.aquifer_layer_table.index: 
             raise ValueError(
                 f'top_aquifer_layer(received:{self.top_aquifer_layer}) not present in the dataframe')
         if self.top_aquifer_layer not in ['100qa', '102utqa']:
             raise ValueError(
                 f'top_aquifer_layer(received:{self.top_aquifer_layer}) should either be 100qa or 102utqa'
             )
-        self.depth_to_aquifer_base = self.depth_data.loc[self.top_aquifer_layer]['depth_to_base']
+        self.depth_to_aquifer_base = self.aquifer_layer_table.loc[self.top_aquifer_layer]['depth_to_base']
 
         self._validate_all_inputs()
         self.is_initialised = True
@@ -370,8 +414,8 @@ class WellBoreDict:
     def _validate_data(self):
         for arg in self.data_param_names:
             value = getattr(self, arg)
-            if validate(value, lambda x: not isinstance(x, pd.DataFrame) or x.empty):
-                self.logger.critical('validate_data failed')
+            if validate(value, lambda x: x.empty):
+                self.logger.critical(f'{self.__class__.__name__}.{self._validate_data.__name__} check failed: {arg} is an empty dataframe')
                 return False
         return True
 
@@ -381,13 +425,13 @@ class WellBoreDict:
         Performs validation checks for the initial input data
         """
 
-        if not isinstance(self.casing_diameter_data, pd.DataFrame) or self.casing_diameter_data.empty:
+        if not isinstance(self.casing_diameter_table, pd.DataFrame) or self.casing_diameter_table.empty:
             raise ValueError("Invalid or missing casing diameter data")
 
-        if not isinstance(self.drilling_diameter_data, pd.DataFrame) or self.drilling_diameter_data.empty:
+        if not isinstance(self.drilling_diameter_table, pd.DataFrame) or self.drilling_diameter_table.empty:
             raise ValueError("Invalid or missing drilling diameter data")
 
-        if not isinstance(self.depth_data, pd.DataFrame) or self.depth_data.empty:
+        if not isinstance(self.aquifer_layer_table, pd.DataFrame) or self.aquifer_layer_table.empty:
             raise ValueError("Invalid or missing depth data")
 
         for param in self.initial_param_names:

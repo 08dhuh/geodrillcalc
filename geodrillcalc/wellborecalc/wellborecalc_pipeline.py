@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 from ..wellbore_dict import WellBoreDict
-from . import stage1_calc_interval as ci, stage2_calc_pump as cp, stage3_calc_casing as cc
+from . import stage1_calc_screen as ci, stage2_calc_pump as cp, stage3_calc_casing as cc
 from ..utils.utils import getlogger, find_next_largest_value
 
 
@@ -30,7 +30,7 @@ class CalcPipeline:
     4. calc_pipeline: Encapsulates the pipeline methods in a single method
 
     Required Parameters:
-        depth_data = {
+        aquifer_layer_table = {
             "aquifer_layer": [
                 '100qa',
                 '103utqd',
@@ -81,7 +81,7 @@ class CalcPipeline:
 
     Usage Example:
     wbd = WellBoreDict()
-    wbd.initialise_and_validate_input_data(depth_data=depth_data, **initial_values)  
+    wbd.initialise_and_validate_input_data(aquifer_layer_table=aquifer_layer_table, **initial_values)  
     
     calc_injectionpipe = CalcPipeline(wbd)
     calc_injectionpipe.calc_pipeline(is_production_pump=True)
@@ -178,7 +178,7 @@ class CalcPipeline:
         ir['production_screen_diameter'] = max(
             min_total_casing_production_screen_diameter, self.casing_diameters_in_metres[0])
         ir['injection_screen_diameter'] = \
-            wbd.drilling_diameter_data.loc[wbd.drilling_diameter_data['metres']
+            wbd.drilling_diameter_table.loc[wbd.drilling_diameter_table['metres']
                                            == ir['injection_open_hole_diameter']]['recommended_screen'].iloc[0]
         wbd.assign_input_params(ir.keys(), **ir)
         # for key, value in ir.items():
@@ -269,7 +269,7 @@ class CalcPipeline:
         casing_stage_data['drill_bit'] =\
             casing_stage_data.apply(lambda row: cc.calculate_drill_bit_diameter
                                     (row['casing'],
-                                     wbd.casing_diameter_data) if not np.isnan(row['casing']) else row['casing'],
+                                     wbd.casing_diameter_table) if not np.isnan(row['casing']) else row['casing'],
                                     axis=1)
         # print(casing_stage_data)
         setattr(wbd, 'casing_stage_data', casing_stage_data)
