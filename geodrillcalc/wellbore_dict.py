@@ -65,7 +65,6 @@ class WellBoreDict:
     export_results_to_json_string(self):
         Exports the results of the wellbore calculations to a JSON string.
     """
-
     _INPUT_ATTRIBUTES = {
         # Input tables
         "casing_diameter_table": pd.DataFrame,
@@ -100,84 +99,41 @@ class WellBoreDict:
 
     _OUTPUT_ATTRIBUTES = {
         # Output parameters for production and injection holes
+        #screen stage
         "production_screen_length": float,
-        "injection_screen_length": float,
         "production_screen_length_error": float,
-        "injection_screen_length_error": float,
         "production_screen_diameter": float,
-        "injection_screen_diameter": float,
         "production_open_hole_diameter": float,
-        "injection_open_hole_diameter": float,
-        "pump_inlet_depth": float,
-        "minimum_pump_housing_diameter": float,
         "min_total_casing_production_screen_diameter": float,
 
+        "injection_screen_length": float,
+        "injection_screen_length_error": float,
+        "injection_screen_diameter": float,
+        "injection_open_hole_diameter": float,
+        #pump
+        "pump_inlet_depth": float,
+        "minimum_pump_housing_diameter": float,
+
         # Output dataframes
-        "screen_stage_table": pd.DataFrame,
+        "screen_stage_table": pd.DataFrame, #detailing 
         "casing_stage_table": pd.DataFrame
     }
 
+    all_attributes = _INPUT_ATTRIBUTES | _OUTPUT_ATTRIBUTES
+
     table_attribute_names = [key for key, val in _INPUT_ATTRIBUTES.items() if val == pd.DataFrame] +\
         [key for key, val in _OUTPUT_ATTRIBUTES.items() if val == pd.DataFrame]
-    # [
-    #     # ----------------input
-    #     "casing_diameter_table",
-    #     "drilling_diameter_table",
-    #     "aquifer_layer_table",
-    #     # ----------------tbd by pipeline
-    #     "screen_stage_table",
-    #     "casing_stage_table"
-    # ]
 
     initial_param_names = [
         key for key, val in _INPUT_ATTRIBUTES.items() if val != pd.DataFrame]
-    # [
-    #     # input variables
-    #     "required_flow_rate",
-    #     "hydraulic_conductivity",
-    #     "average_porosity",
-    #     "bore_lifetime_year",
-    #     "groundwater_depth",
-    #     "long_term_decline_rate",
-    #     "allowable_drawdown",
-    #     "safety_margin",
-    #     # added inputs
-    #     "top_aquifer_layer",
-    #     "target_aquifer_layer",
-    #     # Below are derived from the input parameters
-    #     "depth_to_top_screen",
-    #     "required_flow_rate_per_litre_sec",
-    #     "required_flow_rate_per_m3_sec",
-    #     "bore_lifetime_per_day",
-    #     "aquifer_thickness",
-    #     "depth_to_aquifer_base",
-    #     # And below are params with preassigned default values
-    #     "sand_face_velocity_production",
-    #     "sand_face_velocity_injection",
-    #     "net_to_gross_ratio_aquifer",
-    #     "aquifer_average_porosity",
-    #     "pipe_roughness_coeff",
-    # ]
 
-    output_param_names = [*_OUTPUT_ATTRIBUTES.keys()]
-    # [
-    #     "production_screen_length",
-    #     "injection_screen_length",
-    #     "production_screen_length_error",
-    #     "injection_screen_length_error",
-    #     "min_total_casing_production_screen_diameter",
-    #     "production_screen_diameter",
-    #     "injection_screen_diameter",
-    #     "production_open_hole_diameter",
-    #     "injection_open_hole_diameter",
-    #     "pump_inlet_depth",
-    #     "minimum_pump_housing_diameter",
-    #     "screen_stage_table",
-    #     "casing_stage_table"
-    # ]
+    output_attribute_names = [*_OUTPUT_ATTRIBUTES.keys()]
 
     def __init__(self, logger=None):
+        for attr in self.all_attributes:
+            setattr(self, attr, None)
         # ----------------------------------------------------------------
+        # table initialisation
         self.casing_diameter_table = pd.DataFrame(
             columns=['inches', 'metres', 'recommended_bit'])
         self.drilling_diameter_table = pd.DataFrame(
@@ -185,45 +141,13 @@ class WellBoreDict:
         self.aquifer_layer_table = pd.DataFrame(
             columns=["aquifer_layer", "is_aquifer", "depth_to_base"])
         # ----------------------------------------------------------------
-        # input parameters
-        self.required_flow_rate = None
-        self.hydraulic_conductivity = None
-        self.average_porosity = None
-        self.bore_lifetime_year = None
-        self.groundwater_depth = None
-        self.long_term_decline_rate = None
-        self.allowable_drawdown = None
-        self.safety_margin = None
-        # ----------------------------------------------------------------
-        # inferred from input parameters
-        self.required_flow_rate_per_litre_sec = None
-        self.required_flow_rate_per_m3_sec = None
-        self.bore_lifetime_per_day = None
-        self.depth_to_top_screen = None
-        self.aquifer_thickness = None
-        self.depth_to_aquifer_base = None
-        # ----------------------------------------------------------------
-        # constants
+        # constant initialisation
         self.sand_face_velocity_production = .01
         self.sand_face_velocity_injection = .003
         self.net_to_gross_ratio_aquifer = 1
         self.aquifer_average_porosity = .25
         self.pipe_roughness_coeff = 100
         # ----------------------------------------------------------------
-        # result stage
-        self.production_screen_length = None
-        self.injection_screen_length = None
-        self.production_screen_length_error = None
-        self.injection_screen_length_error = None
-        self.production_screen_diameter = None
-        self.injection_screen_diameter = None
-        self.production_open_hole_diameter = None
-        self.injection_open_hole_diameter = None
-        self.pump_inlet_depth = None
-        self.minimum_pump_housing_diameter = None
-        self.min_total_casing_production_screen_diameter = None
-        # ----------------------------------------------------------------
-        # result dataframe
         self.screen_stage_table = None
         self.casing_stage_table = self._initialise_casing_stage_table()
         # ----------------------------------------------------------------
@@ -232,9 +156,8 @@ class WellBoreDict:
         # ----------------------------------------------------------------
         self.logger = logger or getlogger()
         # ----------------------------------------------------------------
-        # input added
-        self.top_aquifer_layer = None
-        self.target_aquifer_layer = None
+
+
 
     def _initialise_diameter_table(self,
                                    casing_diameter_table=None,
@@ -455,7 +378,7 @@ class WellBoreDict:
             self.logger.critical('Unfinished pipeline')
             return
         results = {}
-        for key in self.output_param_names:
+        for key in self.output_attribute_names:
             value = getattr(self, key)
             if isinstance(value, pd.DataFrame):
                 # json compatible

@@ -148,7 +148,7 @@ class GeoDrillCalcInterface:
         """
         if not self.wbd.is_initialised or not self.wbd.calculation_completed:
             return
-        for key in self.wbd.output_param_names:
+        for key in self.wbd.output_attribute_names:
             value = getattr(self.wbd, key)
             self.logger.info(f"{key}: {value}")
 
