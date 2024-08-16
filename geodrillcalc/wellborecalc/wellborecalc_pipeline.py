@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import numpy as np
 import pandas as pd
-from .wellbore_dict import WellBoreDict
-from .wellborecalc import calc_casing as cc, calc_interval as ci, calc_pump as cp
-from .utils.utils import getlogger, find_next_largest_value
+from ..wellbore_dict import WellBoreDict
+from . import stage1_calc_interval as ci, stage2_calc_pump as cp, stage3_calc_casing as cc
+from ..utils.utils import getlogger, find_next_largest_value
 
 
 class CalcPipeline:

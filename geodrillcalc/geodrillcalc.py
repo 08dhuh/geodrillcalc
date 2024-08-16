@@ -17,7 +17,7 @@ Note: Ensure that you provide valid depth data and initial input data
 when using the 'calculate_and_return_wellbore_parameters' method.
 """
 from .wellbore_dict import WellBoreDict
-from .calc_pipeline import CalcPipeline
+from .wellborecalc.wellborecalc_pipeline import CalcPipeline
 from .utils.utils import getlogger
 
 class GeoDrillCalcInterface:

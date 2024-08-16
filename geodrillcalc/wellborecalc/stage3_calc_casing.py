@@ -8,7 +8,6 @@ logger = getlogger()
 # ================================================================
 # Stage 3. Determine parameters for each casing state
 
-# TODO: needs to read stratigraphic depths
 # TODO: calculate_pre_collar_casing_diameter might need change later
 # TODO: needs to query PCD corresponding to the smallest total tubing surface area
 # TODO: in calculation pipeline, make sure to query the smallest production casing
@@ -351,6 +350,6 @@ def calculate_screen_depths(depth_to_top_screen, screen_length, aquifer_thicknes
 
     if aquifer_thickness < screen_length:
         logger.warning(
-            "aquifer thickness should be smaller than the screen length")
+            "screen length should not exceed aquifer thickness")
         return [depth_to_top_screen, np.nan]
     return [depth_to_top_screen, round(depth_to_top_screen + screen_length)]

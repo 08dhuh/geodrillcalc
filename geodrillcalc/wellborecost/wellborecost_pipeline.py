@@ -139,3 +139,31 @@
 }
 
 """
+
+from ..wellbore_dict import WellBoreDict
+from ..utils.utils import getlogger
+
+logger = getlogger()
+
+
+class CostPipeLine:
+	"""
+	A class designed to estimate wellbore installation cost based on the wellbore model parameters calculated in the previous stages.
+
+	cost calculation
+	comprises of 4 separate steps
+
+	"""
+
+	def __init__(self) -> None:
+		pass
+
+	def calc_pipeline(self):
+		final_result = {
+			'base': None,
+			'error_margins': {
+				'low': None,
+				'high': None
+			}
+		}
+		return final_result
