@@ -137,7 +137,7 @@ def calculate_intermediate_casing_diameter(screen_diameter,
                                            smallest_production_casing_diameter,
                                            casing_diameter_table):
     """
-    Calculates the intermediate casing diameter based on the given parameters.
+    Selects the largest of the given parameters as the intermediate casing diameter.
 
     This high-level function compares one case size larger than the injection or production screen diameter with the Production Casing Diameter (PCD) corresponding to the smallest total tubing surface area.
 
@@ -300,14 +300,14 @@ def calculate_superficial_casing_diameter(is_superficial_casing_required, diamet
 
 
 def calculate_drill_bit_diameter(casing_stage_diameter: float,
-                                 casing_dataframe,
+                                 casing_diameter_table,
                                  casing_recommended_bit_columns=['metres', 'recommended_bit']):
     """
     Calculates the recommended drill bit diameter based on the casing stage diameter.
 
     Parameters:
     - casing_stage_diameter: (float) Diameter of the casing stage.
-    - casing_dataframe: DataFrame containing diameters and their corresponding recommended bits.
+    - casing_diameter_table: DataFrame containing diameters and their corresponding recommended bits.
     - casing_recommended_bit_columns=['metres','recommended_bit']
     Returns:
     - drill_bit_diameter: (float) Recommended drill bit diameter.
@@ -320,7 +320,7 @@ def calculate_drill_bit_diameter(casing_stage_diameter: float,
 
     """
     col1, col2 = casing_recommended_bit_columns
-    value = casing_dataframe.loc[casing_dataframe[col1]
+    value = casing_diameter_table.loc[casing_diameter_table[col1]
                                  == casing_stage_diameter][col2].values
     if len(value) > 0:
         return value[0]

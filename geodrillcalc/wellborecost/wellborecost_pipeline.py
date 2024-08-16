@@ -19,7 +19,7 @@
 		"injection_open_hole_diameter": 0.2159,
 		"pump_inlet_depth": 85.0,
 		"minimum_pump_housing_diameter": 0.28587049479391613,
-		"interval_stage_data": {
+		"screen_stage_table": {
 			"prod_casing_diameters": [
 				0.1016,
 				0.1143,
@@ -101,7 +101,7 @@
 				1314.9632324900429
 			]
 		},
-		"casing_stage_data": {
+		"casing_stage_table": {
 			"top": [
 				0.0,
 				null,

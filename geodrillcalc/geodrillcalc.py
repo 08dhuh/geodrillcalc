@@ -10,7 +10,7 @@ Example Usage:
     result_wbd = geo_interface.calculate_and_return_wellbore_parameters(
         is_production_pump=True,
         aquifer_layer_table=aquifer_layer_table,
-        initial_input_data=initial_values
+        initial_input_params=initial_values
     )
 
 Note: Ensure that you provide valid depth data and initial input data
@@ -45,7 +45,7 @@ class GeoDrillCalcInterface:
     result_wbd = geo_interface.calculate_and_return_wellbore_parameters(
         is_production_pump=True,
         aquifer_layer_table=aquifer_layer_table,
-        initial_input_data=initial_values
+        initial_input_params=initial_values
     )
 
     Note: Ensure that you provide valid depth data and initial input data
@@ -61,7 +61,7 @@ class GeoDrillCalcInterface:
     def calculate_and_return_wellbore_parameters(self,
                                                  is_production_pump: bool,
                                                  aquifer_layer_table,
-                                                 initial_input_data):
+                                                 initial_input_params):
         """
         Orchestration method for inputting and calculating 
         the model parameters
@@ -69,7 +69,7 @@ class GeoDrillCalcInterface:
         Parameters:
             is_production_pump: bool
             aquifer_layer_table: pd.DataFrame
-            initial_input_data: dict
+            initial_input_params: dict
 
         Returns:
             WellBoreDict instance containing the results
@@ -125,20 +125,20 @@ class GeoDrillCalcInterface:
                     "top_aquifer_layer": "100qa"
                 }
         """
-        self._initialise(aquifer_layer_table, initial_input_data)
+        self._initialise(aquifer_layer_table, initial_input_params)
         self.cpl = CalcPipeline(self.wbd)
         self.cpl.calc_pipeline(is_production_pump)
         self._log_outcome()
         return self.wbd
 
-    def _initialise(self, aquifer_layer_table, initial_input_data):
+    def _initialise(self, aquifer_layer_table, initial_input_params):
         """
         Initialises and prepares the instance for the pipeline
         """
         if self.wbd is None:
             self.wbd = WellBoreDict()
-        self.wbd.initialise_and_validate_input_data(aquifer_layer_table=aquifer_layer_table,
-                                                    **initial_input_data)
+        self.wbd.initialise_and_validate_input_params(aquifer_layer_table=aquifer_layer_table,
+                                                    **initial_input_params)
 
     def _log_outcome(self):
         """

@@ -72,21 +72,6 @@ def find_next_largest_value(val, array):
     # use round_algorithm function predefined
 
 
-def validate_data(func):
-    @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
-        # Check the validity of the data.
-        if not self.casing_data['casing_diameter_table']:
-            raise ValueError('casing_diameter_table is required.')
-
-        if not self.aquifer_layer_table:
-            raise ValueError('aquifer_layer_table is required.')
-
-        # Call the decorated function.
-        return func(self, *args, **kwargs)
-
-    return wrapper
-
 
 def validate(value, condition=None):
     if condition:

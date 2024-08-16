@@ -29,7 +29,7 @@ class WellBoreDict:
     __init__(self, logger=None):
         Initializes the WellBoreDict instance with default values.
     
-    _initialise_diameter_data(self, casing_diameter_table=None, drilling_diameter_table=None):
+    _initialise_diameter_table(self, casing_diameter_table=None, drilling_diameter_table=None):
         Initializes diameter data for casing and drilling.
     
     _initialise_aquifer_layer_table(self, aquifer_layer_table):
@@ -38,7 +38,7 @@ class WellBoreDict:
     assign_input_params(self, arg_names: list, **kwargs):
         Assigns input parameters from keyword arguments.
     
-    _get_diameter_data(self, dataset, metric='metres', as_numpy=True):
+    _get_diameter_table(self, dataset, metric='metres', as_numpy=True):
         Retrieves diameter data in the specified metric.
     
     get_casing_diameters(self, metric='metres', as_numpy=True):
@@ -47,13 +47,13 @@ class WellBoreDict:
     get_drilling_diameters(self, metric='metres', as_numpy=True):
         Returns drilling diameters as a numpy array or pandas Series.
     
-    _initialise_casing_stage_data(self):
+    _initialise_casing_stage_table(self):
         Initializes the casing stage data DataFrame.
     
-    initialise_and_validate_input_data(self, **kwargs):
+    initialise_and_validate_input_params(self, **kwargs):
         Initializes and validates the input data for wellbore calculations.
     
-    _validate_data(self):
+    _validate_table(self):
         Validates the essential data parameters.
     
     _validate_all_inputs(self):
@@ -107,8 +107,8 @@ class WellBoreDict:
         "pump_inlet_depth": float,
         "minimum_pump_housing_diameter": float,
         # Output dataframes
-        "interval_stage_data": pd.DataFrame,
-        "casing_stage_data": pd.DataFrame        
+        "screen_stage_table": pd.DataFrame,
+        "casing_stage_table": pd.DataFrame        
     }
     
     data_param_names = [
@@ -117,8 +117,8 @@ class WellBoreDict:
         "drilling_diameter_table",
         "aquifer_layer_table",
         # ----------------tbd by pipeline
-        "interval_stage_data",
-        "casing_stage_data"
+        "screen_stage_table",
+        "casing_stage_table"
     ]
 
     initial_param_names = [
@@ -161,8 +161,8 @@ class WellBoreDict:
         "injection_open_hole_diameter",
         "pump_inlet_depth",
         "minimum_pump_housing_diameter",
-        "interval_stage_data",
-        "casing_stage_data"
+        "screen_stage_table",
+        "casing_stage_table"
     ]
 
     def __init__(self, logger=None):
@@ -214,8 +214,8 @@ class WellBoreDict:
         self.min_total_casing_production_screen_diameter = None
         # ----------------------------------------------------------------
         # result dataframe
-        self.interval_stage_data = None
-        self.casing_stage_data = self._initialise_casing_stage_data()
+        self.screen_stage_table = None
+        self.casing_stage_table = self._initialise_casing_stage_table()
         # ----------------------------------------------------------------
         self.is_initialised = False
         self.calculation_completed = False
@@ -226,7 +226,7 @@ class WellBoreDict:
         self.top_aquifer_layer = None
         self.target_aquifer_layer = None
 
-    def _initialise_diameter_data(self,
+    def _initialise_diameter_table(self,
                                   casing_diameter_table=None,
                                   drilling_diameter_table=None,):
         self.casing_diameter_table = casing_diameter_table or pd.DataFrame({
@@ -267,7 +267,7 @@ class WellBoreDict:
     # def set_is_production(self, is_production):
     #     self.is_production = is_production
 
-    def _get_diameter_data(self, dataset, metric='metres', as_numpy=True):
+    def _get_diameter_table(self, dataset, metric='metres', as_numpy=True):
         """
         dataset: self.casing_diameter_table if 'casing' else self.drilling_diameter_table
         metric: if 'metres' or 'inches', returns the corresponding column. Otherwise, returns the whole dataset
@@ -281,17 +281,17 @@ class WellBoreDict:
 
     def get_casing_diameters(self, metric='metres', as_numpy=True):
         """Returns as numpy array """
-        return self._get_diameter_data(dataset='casing', metric=metric, as_numpy=as_numpy)
+        return self._get_diameter_table(dataset='casing', metric=metric, as_numpy=as_numpy)
         # if metric == None
         # diam = self.casing_diameter_table['metres']
         # return np.array(diam) if as_numpy else diam
 
     def get_drilling_diameters(self, metric='metres', as_numpy=True):
-        return self._get_diameter_data(dataset='drilling', metric=metric, as_numpy=as_numpy)
+        return self._get_diameter_table(dataset='drilling', metric=metric, as_numpy=as_numpy)
         # diam = self.drilling_diameter_table['metres']
         # return np.array(diam) if as_numpy else diam
 
-    def _initialise_casing_stage_data(self):
+    def _initialise_casing_stage_table(self):
         casing_stages = ["pre_collar",
                          "superficial_casing",
                          "pump_chamber_casing",
@@ -305,7 +305,7 @@ class WellBoreDict:
         return casing_df
 
     # TODO: The method directly accesses specific layers (LMTA, LTA, QA_UTQA) using .loc.
-    def initialise_and_validate_input_data(self, **kwargs):
+    def initialise_and_validate_input_params(self, **kwargs):
         """
         Initialises the WellboreDict instance with the provided depth data and initial parameters
 
@@ -376,7 +376,7 @@ class WellBoreDict:
         wbd.initialise(aquifer_layer_table=aquifer_layer_table, **initial_values)
 
         """
-        self._initialise_diameter_data()
+        self._initialise_diameter_table()
         self._initialise_aquifer_layer_table(kwargs.get('aquifer_layer_table'))
         self.assign_input_params(self.initial_param_names, **kwargs)
 
@@ -411,11 +411,11 @@ class WellBoreDict:
         self._validate_all_inputs()
         self.is_initialised = True
 
-    def _validate_data(self):
+    def _validate_table(self):
         for arg in self.data_param_names:
             value = getattr(self, arg)
             if validate(value, lambda x: x.empty):
-                self.logger.critical(f'{self.__class__.__name__}.{self._validate_data.__name__} check failed: {arg} is an empty dataframe')
+                self.logger.critical(f'{self.__class__.__name__}.{self._validate_table.__name__} check failed: {arg} is an empty dataframe')
                 return False
         return True
 
