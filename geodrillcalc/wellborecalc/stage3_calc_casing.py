@@ -134,8 +134,8 @@ def calculate_pump_chamber_depths(is_pump_chamber_required: bool, pump_inlet_dep
 
 
 def calculate_intermediate_casing_diameter(screen_diameter,
-                                           smallest_production_casing_diameter,
-                                           casing_diameter_table):
+                                           casing_diameter_table,
+                                        smallest_production_casing_diameter):
     """
     Selects the largest of the given parameters as the intermediate casing diameter.
 
@@ -160,7 +160,9 @@ def calculate_intermediate_casing_diameter(screen_diameter,
     return intermediate_casing_diameter
 
 
-def is_separate_pump_chamber_required(is_production_well, intermediate_casing_diameter=None, minimum_pump_housing_diameter=None):
+def is_separate_pump_chamber_required(is_production_well, 
+                                      intermediate_casing_diameter=None, 
+                                      minimum_pump_housing_diameter=None):
     """
     Determines whether a separate pump chamber is required for a well.
 

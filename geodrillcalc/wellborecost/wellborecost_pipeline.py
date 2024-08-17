@@ -20,7 +20,7 @@
 		"pump_inlet_depth": 85.0,
 		"minimum_pump_housing_diameter": 0.28587049479391613,
 		"screen_stage_table": {
-			"prod_casing_diameters": [
+			"casing_diameters": [
 				0.1016,
 				0.1143,
 				0.127,

@@ -67,6 +67,6 @@ def test_pipeline():
     jsonstr = wbd.export_results_to_json_string()
     result = wbd.export_results_to_dict()
     print(result)
-    assert wbd.is_initialised
+    assert wbd.ready_for_calculation
     assert wbd.calculation_completed
     assert type(jsonstr) is str
