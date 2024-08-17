@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import logging
 import numpy as np
-import functools
+import pandas as pd
 
 logger=None
 
@@ -80,6 +80,24 @@ def find_next_largest_value(val, array):
     # TODO: read casing diameter csv, import the column in meters,
     # use round_algorithm function predefined
 
+def query_diameter_table(val:float, 
+                         table:pd.DataFrame, #wbd's drillling or casing table
+                         metric_column:str='metres', #'inches' or 'metres'
+                         query_param_column_id:int = 2): #2 is the default for wbd's drilling/casing table
+    """
+    """
+    try:
+        matching_row = table[table[metric_column] == val]
+        if matching_row.empty:
+            raise ValueError(f"No match found for value {val} in column '{metric_column}'")
+        recommended_bit = matching_row.iloc[0,query_param_column_id]
+        return recommended_bit        
+    except KeyError as e:
+        raise KeyError(f"Column '{metric_column}' does not exist in the table. Details: {e}")
+    except IndexError as e:
+        raise IndexError(f"The DataFrame does not have a column {query_param_column_id+1}. Details: {e}")
+    except Exception as e:
+        raise RuntimeError(f"An unexpected error occurred: {e}")
 
 
 def validate(value, condition=None):

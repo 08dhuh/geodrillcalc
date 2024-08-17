@@ -212,7 +212,9 @@ def calculate_pump_chamber_diameter(minumum_pump_housing_diameter, casing_diamet
     return pump_chamber_diameter
 
 
-def calculate_intermediate_casing_depths(depth_to_top_screen, is_separate_pump_chamber_required, intermediate_casing_top=None):
+def calculate_intermediate_casing_depths(depth_to_top_screen, 
+                                         is_separate_pump_chamber_required, 
+                                         intermediate_casing_top=np.nan):
     """
     Calculates and returns the depth range for the intermediate casing.
 
@@ -232,13 +234,11 @@ def calculate_intermediate_casing_depths(depth_to_top_screen, is_separate_pump_c
     - If no pump chamber is required, the intermediate casing starts at the surface (depth 0).
 
     """
-    if intermediate_casing_top is None:
+    if intermediate_casing_top is None or (isinstance(intermediate_casing_top, float) and np.isnan(intermediate_casing_top)):
         if is_separate_pump_chamber_required:
             raise ValueError(
                 'Pump chamber required. Please pass pump inlet depth as the intermediate_casing_top argument')
-        else:
-            intermediate_casing_top = 0
-
+        intermediate_casing_top = 0    
     return [intermediate_casing_top, depth_to_top_screen - 10]
 
 

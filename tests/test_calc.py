@@ -61,7 +61,7 @@ def test_pipeline():
     }
 
     gci = gdc.GeoDrillCalcInterface()
-    wbd = gci.calculate_and_return_wellbore_parameters(True,
+    wbd = gci.calculate_and_return_wellbore_parameters(False, # True for production, false for injection
                                                        aquifer_layer_table,
                                                        initial_values)
     jsonstr = wbd.export_results_to_json_string()

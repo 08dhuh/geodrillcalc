@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from ..wellbore_dict import WellBoreDict
 from . import stage1_calc_screen as ci, stage2_calc_pump as cp, stage3_calc_casing as cc
-from ..utils.utils import getlogger, find_next_largest_value
+from ..utils.utils import getlogger, find_next_largest_value, query_diameter_table
 
 
 class CalcPipeline:
@@ -124,6 +124,7 @@ class CalcPipeline:
         """
         wbd = self.wbd  # fully initialised wellboredict instance
         ir = {}
+        drilling_diameter_list = wbd.get_drilling_diameters()
 
         ir['screen_length'], ir['screen_length_error'] = \
             ci.calculate_minimum_screen_length(wbd.required_flow_rate,
@@ -131,17 +132,8 @@ class CalcPipeline:
                                                wbd.bore_lifetime_per_day,
                                                wbd.aquifer_thickness,
                                                wbd.is_production_well)
-        ohd_min = ci.calculate_minimum_open_hole_diameter(wbd.required_flow_rate_per_m3_sec,
-                                                                     ir['screen_length'],
-                                                                     wbd.sand_face_velocity_production if wbd.is_production_well else wbd.sand_face_velocity_injection,
-                                                                     wbd.aquifer_average_porosity,
-                                                                     wbd.net_to_gross_ratio_aquifer)
         
-        ir['open_hole_diameter'] = find_next_largest_value(
-            ohd_min, self.drilling_diameters_in_metres)
-
-
-        if wbd.is_production_well:
+        if wbd.is_production_well: #production pipeline
             #define and populates 3 associated parameters
             screen_df = pd.DataFrame(self.casing_diameters_in_metres,
                                     columns=['production_casing_diameters'])
@@ -175,15 +167,29 @@ class CalcPipeline:
             screen_df.iloc[screen_df['total_casing'].argmin(
                 skipna=True)]['production_screen_diameters']
             ir['min_total_casing_production_screen_diameter'] = min_total_casing_production_screen_diameter
-            ir['screen_diameter'] = max(
-            min_total_casing_production_screen_diameter, self.casing_diameters_in_metres[0])
-            #stores the screen stage parameter table to wbd
-            setattr(self.wbd, 'screen_stage_table', screen_df)
-        else: #injection_screen_diameter
-            ir['screen_diameter'] = \
-            wbd.drilling_diameter_table.loc[wbd.drilling_diameter_table['metres']
-                                           == ir['injection_open_hole_diameter']]['recommended_screen'].iloc[0]
+            setattr(self.wbd, 'screen_stage_table', screen_df) #stores the screen stage table to wbd
+            
+            screen_diameter = max(min_total_casing_production_screen_diameter, self.casing_diameters_in_metres[0])
+            ohd_min = ci.calculate_minimum_open_hole_diameter(wbd.required_flow_rate_per_m3_sec,
+                                                                     ir['screen_length'],
+                                                                     wbd.sand_face_velocity_production,
+                                                                     wbd.aquifer_average_porosity,
+                                                                     wbd.net_to_gross_ratio_aquifer)        
+            ohd = ci.calculate_open_hole_diameter(ohd_min, drilling_diameter_list)
+            ohd = ci.calibrate_open_hole_diameter(ohd, screen_diameter, wbd.casing_diameter_table)
+        else: #injection pipeline
+            #for the injection wells, the screen diameter depends on the open hole diameter
+            ohd_min = ci.calculate_minimum_open_hole_diameter(wbd.required_flow_rate_per_m3_sec,
+                                                                     ir['screen_length'],
+                                                                     wbd.sand_face_velocity_injection,
+                                                                     wbd.aquifer_average_porosity,
+                                                                     wbd.net_to_gross_ratio_aquifer)            
+            ohd = ci.calculate_open_hole_diameter(ohd_min, drilling_diameter_list)
+            screen_diameter = query_diameter_table(ohd, wbd.drilling_diameter_table)
+            #screen_diameter of the injection well guaranteed to be greater than its open hole diameter
         
+        ir['screen_diameter'] = screen_diameter
+        ir['open_hole_diameter'] = ohd
         wbd._assign_input_params(ir.keys(), **ir)
         # for key, value in ir.items():
         #     print(f"{key}: {value}")
@@ -265,7 +271,7 @@ class CalcPipeline:
                                                                         casing_stage_table.loc['pump_chamber_casing']['bottom']),
                                cc.calculate_intermediate_casing_diameter(screen_diameter,
                                                                          self.casing_diameters_in_metres,
-                                                                         wbd.min_total_casing_production_screen_diameter,
+                                                                         wbd.min_total_casing_production_screen_diameter if is_production_well else 0,
                                                                          )]
         casing_stage_table.loc['intermediate_casing'] = intermediate_casing
         # ------screen riser section

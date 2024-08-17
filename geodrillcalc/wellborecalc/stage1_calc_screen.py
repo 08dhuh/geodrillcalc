@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
-from ..utils.utils import getlogger
+from ..utils.utils import getlogger, find_next_largest_value, query_diameter_table
 
 logger = getlogger()
 
@@ -86,7 +86,8 @@ def calculate_minimum_screen_length(req_flow_rate: float,
     screen_length = (2.3*req_flow_rate / (4*np.pi*hyd_conductivity*allowable_drawdown)) \
         * np.log10(2.25*hyd_conductivity*bore_lifetime/(bore_radius**2 * specific_storage))
     if not is_production_well:
-        screen_length *= 2 #ii.	If Injection bore, multiply SL x 2.0 (capped at total aquifer thickness)
+        # ii.	If Injection bore, multiply SL x 2.0 (capped at total aquifer thickness)
+        screen_length *= 2
     screen_length = min(screen_length, aquifer_thickness)
     error_lower = screen_length * .9
     error_upper = min(screen_length * 1.1, aquifer_thickness)
@@ -152,7 +153,6 @@ def calculate_minimum_screen_diameter(up_hole_frictions: np.ndarray,
     return d
 
 
-
 def calculate_total_casing(prod_casing_diameter: float,
                            screen_diameter,
                            intermediate_casing: float,
@@ -189,7 +189,6 @@ def calculate_total_casing(prod_casing_diameter: float,
     return total_casing
 
 
-
 def calculate_minimum_open_hole_diameter(req_flow_rate_sec,
                                          screen_length,
                                          sand_face_velocity,
@@ -197,7 +196,7 @@ def calculate_minimum_open_hole_diameter(req_flow_rate_sec,
                                          ngr_aquifer=1
                                          ):
     """
-    Defines variable values to calculate open hole diameter (OHD):
+    Defines variable values to calculate minimum open hole diameter (OHD):
         i. Q = required flow rate (m^3/s)
         ii. 𝜙 = average reservoir porosity (0–1)
         iii. NGR = net-to-gross ratio for the aquifer, default: 1 (K for Gippsland aquifer units is already averaged)
@@ -218,3 +217,39 @@ def calculate_minimum_open_hole_diameter(req_flow_rate_sec,
     ohd_min = req_flow_rate_sec / \
         (sand_face_velocity * np.pi * reservoir_porosity * ngr_aquifer * screen_length)
     return ohd_min
+
+
+def calculate_open_hole_diameter(ohd_min: float,
+                                 drilling_diameters_in_metres: list | np.ndarray,
+                                 ) -> float:
+    """
+    Defines variable values to calculate open hole diameter (OHD):
+
+    Input Parameters:
+        i. ohd_min = minimum open hole diameter calculated with calculate_minimum_open_hole_diameter (m)
+        ii. drilling_diameters_in_metres: list or np.ndarray (m) 
+
+    Returns:
+        open_hole_diameter: (float) open hole diameter (OHD), either next largest standard bit size > OHDmin
+    or if OHD < SD (from Step 4.f), then OHD = next largest standard bit size > SD
+    """
+
+    ohd = find_next_largest_value(
+        ohd_min, drilling_diameters_in_metres)
+    return ohd
+
+
+def calibrate_open_hole_diameter(ohd: float,
+                                 screen_diameter: float,
+                                 casing_diameter_table
+                                 ):
+    """
+
+    Returns:
+    calibrated open hole diameter
+    """
+    if ohd < screen_diameter:
+        ohd = query_diameter_table(screen_diameter,
+                                   casing_diameter_table
+                                   )
+    return ohd
