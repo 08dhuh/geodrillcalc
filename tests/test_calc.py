@@ -5,13 +5,13 @@ def test_imports():
 
 def debug_pipeline():
     import geodrillcalc.geodrillcalc as gdc
-    depth_data = {'aquifer_layer': ['102utqa', '111lta', '114bse'], 'is_aquifer': [True, True, False], 'depth_to_base': [47.0, 507.0, 807.0]}
+    aquifer_layer_table = {'aquifer_layer': ['102utqa', '111lta', '114bse'], 'is_aquifer': [True, True, False], 'depth_to_base': [47.0, 507.0, 807.0]}
 
 
 def test_pipeline():
     import geodrillcalc.geodrillcalc as gdc
     import geodrillcalc.wellbore_dict as wbdict
-    depth_data = {
+    aquifer_layer_table = {
         "aquifer_layer": [
             '100qa',
             '103utqd',
@@ -61,10 +61,12 @@ def test_pipeline():
     }
 
     gci = gdc.GeoDrillCalcInterface()
-    wbd = gci.calculate_and_return_wellbore_parameters(True,
-                                                       depth_data,
+    wbd = gci.calculate_and_return_wellbore_parameters(False, # True for production, false for injection
+                                                       aquifer_layer_table,
                                                        initial_values)
     jsonstr = wbd.export_results_to_json_string()
-    assert wbd.is_initialised
+    result = wbd.export_results_to_dict()
+    print(result)
+    assert wbd.ready_for_calculation
     assert wbd.calculation_completed
     assert type(jsonstr) is str

@@ -19,8 +19,8 @@
 		"injection_open_hole_diameter": 0.2159,
 		"pump_inlet_depth": 85.0,
 		"minimum_pump_housing_diameter": 0.28587049479391613,
-		"interval_stage_data": {
-			"prod_casing_diameters": [
+		"screen_stage_table": {
+			"casing_diameters": [
 				0.1016,
 				0.1143,
 				0.127,
@@ -101,7 +101,7 @@
 				1314.9632324900429
 			]
 		},
-		"casing_stage_data": {
+		"casing_stage_table": {
 			"top": [
 				0.0,
 				null,
@@ -139,3 +139,31 @@
 }
 
 """
+
+from ..wellbore_dict import WellBoreDict
+from ..utils.utils import getlogger
+
+logger = getlogger()
+
+
+class CostPipeLine:
+	"""
+	A class designed to estimate wellbore installation cost based on the wellbore model parameters calculated in the previous stages.
+
+	cost calculation
+	comprises of 4 separate steps
+
+	"""
+
+	def __init__(self) -> None:
+		pass
+
+	def calc_pipeline(self):
+		final_result = {
+			'base': None,
+			'error_margins': {
+				'low': None,
+				'high': None
+			}
+		}
+		return final_result

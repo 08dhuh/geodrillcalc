@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-
 import numpy as np
-# import logging
-from ..utils.utils import getlogger
+from ..utils.utils import getlogger, find_next_largest_value, query_diameter_table
 
 logger = getlogger()
 
@@ -59,9 +57,9 @@ def is_water_corrosive(temperature_k: float,
 def calculate_minimum_screen_length(req_flow_rate: float,
                                     hyd_conductivity: float,
                                     bore_lifetime: float,
-                                    thickness: float,
-                                    is_injection_bore: bool,
-                                    drawdown: float = 25,
+                                    aquifer_thickness: float,
+                                    is_production_well: bool,
+                                    allowable_drawdown: float = 25,
                                     bore_radius: float = .0762,
                                     specific_storage: float = 2*10**(-4),) -> float:
     """
@@ -85,13 +83,14 @@ def calculate_minimum_screen_length(req_flow_rate: float,
         error: (tuple) lower and upper limits representing the uncertainty bounds
     """
     #
-    screen_length = (2.3*req_flow_rate / (4*np.pi*hyd_conductivity*drawdown)) \
+    screen_length = (2.3*req_flow_rate / (4*np.pi*hyd_conductivity*allowable_drawdown)) \
         * np.log10(2.25*hyd_conductivity*bore_lifetime/(bore_radius**2 * specific_storage))
-    if is_injection_bore:
+    if not is_production_well:
+        # ii.	If Injection bore, multiply SL x 2.0 (capped at total aquifer thickness)
         screen_length *= 2
-    screen_length = min(screen_length, thickness)
+    screen_length = min(screen_length, aquifer_thickness)
     error_lower = screen_length * .9
-    error_upper = min(screen_length * 1.1, thickness)
+    error_upper = min(screen_length * 1.1, aquifer_thickness)
 
     return screen_length, (error_lower, error_upper)
 
@@ -154,46 +153,6 @@ def calculate_minimum_screen_diameter(up_hole_frictions: np.ndarray,
     return d
 
 
-@DeprecationWarning
-def _calculate_minimum_screen_diameter(up_hole_friction: float,
-                                       screen_length: float,
-                                       req_flow_rate: float,
-                                       pipe_roughness_coeff: float = 100.):
-    """
-    Determines the minimum screen diameter, SDmin (m), using the Hazen-Williams equation to ensure up-hole friction is less than 20 m.
-    Reference: https://en.wikipedia.org/wiki/Hazen%E2%80%93Williams_equation#SI_units
-
-    Parameters:
-    - up_hole_friction: (float or np.ndarray) Up-hole friction in m. Must be smaller than 20; otherwise, np.nan is returned.
-    - screen_length: (float) Length of the screen in metres (m).
-    - prod_casing_diameter: (float) Production casing diameter in metres (m).
-    - req_flow_rate: (float) Required flow rate in seconds (m^3/s).
-    - pipe_roughness_coeff: (float, optional) Pipe roughness coefficient, default: 100.
-
-    Returns:
-    - d: (float) Minimum screen diameter (SDmin) in metres (m) to ensure up-hole friction is less than 20. 
-    Returns np.nan if up-hole friction is smaller than 20.
-
-    ----------------------------------------------------------------
-    Notes:
-    - The Hazen-Williams equation is used to calculate friction loss in a pipe.
-    - The minimum screen diameter is determined to ensure that the up-hole friction does not exceed 20 m.
-    """
-
-    try:
-        if up_hole_friction > 20:
-            # logger.debug(f"{up_hole_friction} Up-hole friction is too high")
-            return np.nan
-            # raise ValueError("Up-hole friction is too high")
-        d = (10.67 * screen_length * req_flow_rate**1.852)\
-            / (2*pipe_roughness_coeff**1.852*(20-up_hole_friction))
-        d **= 1/4.8704
-        return d
-    except ValueError as e:
-        logger.exception(e)
-        return np.nan
-
-
 def calculate_total_casing(prod_casing_diameter: float,
                            screen_diameter,
                            intermediate_casing: float,
@@ -228,15 +187,6 @@ def calculate_total_casing(prod_casing_diameter: float,
     total_casing = intermediate_casing * np.pi * prod_casing_diameter + \
         screen_length * np.pi * screen_diameter
     return total_casing
-    # try:
-    #     if prod_casing_diameter <= screen_diameter:
-    #         raise ValueError(
-    #             "Production casing diameter must be greater than the screen diameter")
-    #     total_casing = intermediate_casing * np.pi * prod_casing_diameter + \
-    #         screen_length * np.pi * screen_diameter
-    #     return total_casing
-    # except ValueError as e:
-    #     logger.error(e)
 
 
 def calculate_minimum_open_hole_diameter(req_flow_rate_sec,
@@ -246,7 +196,7 @@ def calculate_minimum_open_hole_diameter(req_flow_rate_sec,
                                          ngr_aquifer=1
                                          ):
     """
-    Defines variable values to calculate open hole diameter (OHD):
+    Defines variable values to calculate minimum open hole diameter (OHD):
         i. Q = required flow rate (m^3/s)
         ii. 𝜙 = average reservoir porosity (0–1)
         iii. NGR = net-to-gross ratio for the aquifer, default: 1 (K for Gippsland aquifer units is already averaged)
@@ -264,10 +214,42 @@ def calculate_minimum_open_hole_diameter(req_flow_rate_sec,
 
     """
     # TODO: prod/injection : sand face velocity differs
-    # sand face velocity
-    # iii.	NGR = net-to-gross ratio for aquifer = 1 (K for Gippsland aquifer units is already averaged)
-    # input porosity / flow rate(sec) / injection or prod screen length
-    # flow / (0.01 * pi * sl * porosity)
     ohd_min = req_flow_rate_sec / \
         (sand_face_velocity * np.pi * reservoir_porosity * ngr_aquifer * screen_length)
     return ohd_min
+
+
+def calculate_open_hole_diameter(ohd_min: float,
+                                 drilling_diameters_in_metres: list | np.ndarray,
+                                 ) -> float:
+    """
+    Defines variable values to calculate open hole diameter (OHD):
+
+    Input Parameters:
+        i. ohd_min = minimum open hole diameter calculated with calculate_minimum_open_hole_diameter (m)
+        ii. drilling_diameters_in_metres: list or np.ndarray (m) 
+
+    Returns:
+        open_hole_diameter: (float) open hole diameter (OHD), either next largest standard bit size > OHDmin
+    or if OHD < SD (from Step 4.f), then OHD = next largest standard bit size > SD
+    """
+
+    ohd = find_next_largest_value(
+        ohd_min, drilling_diameters_in_metres)
+    return ohd
+
+
+def calibrate_open_hole_diameter(ohd: float,
+                                 screen_diameter: float,
+                                 casing_diameter_table
+                                 ):
+    """
+
+    Returns:
+    calibrated open hole diameter
+    """
+    if ohd < screen_diameter:
+        ohd = query_diameter_table(screen_diameter,
+                                   casing_diameter_table
+                                   )
+    return ohd
