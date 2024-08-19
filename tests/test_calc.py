@@ -9,9 +9,11 @@
 
 
 def test_pipeline():
+    import os
     import geodrillcalc.geodrillcalc as gdc
     from geodrillcalc.wellborecost.cost_parameter_extractor import CostParameterExtractor
     from geodrillcalc.wellborecost.wellborecost_pipeline import CostCalculationPipeline
+    import json
 
     aquifer_layer_table = {
         "aquifer_layer": [
@@ -68,18 +70,11 @@ def test_pipeline():
     wbd = gci.calculate_and_return_wellbore_parameters(False, # True for production, false for injection
                                                        aquifer_layer_table,
                                     initial_values)
-    #cpe = CostParameterExtractor(wbd)
-    #jsonstr = wbd.export_results_to_json_string()
-    #result = wbd.export_results_to_dict()
-    #print(result)
-    #print(wbd.casing_stage_table)
+
     assert wbd.ready_for_calculation
     assert wbd.calculation_completed
-    #assert type(jsonstr) is str
-
-    # atts = get_all_non_boilerplate_attributes(CostParameterExtractor)
-    # for att in atts:
-    #     print(cpe.__getattribute__(att))
-    cpl = CostCalculationPipeline(wbd)
+    with open('geodrillcalc/data/fallback_cost_rates.json') as f:
+        cost_rates = json.load(f)
+    cpl = CostCalculationPipeline(wbd, cost_rates)
     print(cpl.wellbore_params)
     
