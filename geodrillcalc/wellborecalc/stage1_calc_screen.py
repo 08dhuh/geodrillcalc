@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import numpy as np
-from ..utils.utils import getlogger, find_next_largest_value, query_diameter_table
+
+from geodrillcalc.utils.calc_utils import find_next_largest_value, query_diameter_table
+from ..utils.utils import getlogger 
+
 
 logger = getlogger()
 

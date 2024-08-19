@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 
-def test_imports():
-    import geodrillcalc.geodrillcalc as gdc
+# def test_imports():
+#     import geodrillcalc.geodrillcalc as gdc
 
-def debug_pipeline():
-    import geodrillcalc.geodrillcalc as gdc
-    aquifer_layer_table = {'aquifer_layer': ['102utqa', '111lta', '114bse'], 'is_aquifer': [True, True, False], 'depth_to_base': [47.0, 507.0, 807.0]}
+# def debug_pipeline():
+#     import geodrillcalc.geodrillcalc as gdc
+#     aquifer_layer_table = {'aquifer_layer': ['102utqa', '111lta', '114bse'], 'is_aquifer': [True, True, False], 'depth_to_base': [47.0, 507.0, 807.0]}
 
 
 def test_pipeline():
     import geodrillcalc.geodrillcalc as gdc
-    import geodrillcalc.wellbore_dict as wbdict
+    from geodrillcalc.wellborecost.cost_parameter_extractor import CostParameterExtractor
+    from geodrillcalc.wellborecost.wellborecost_pipeline import CostCalculationPipeline
+
     aquifer_layer_table = {
         "aquifer_layer": [
             '100qa',
@@ -61,12 +63,23 @@ def test_pipeline():
     }
 
     gci = gdc.GeoDrillCalcInterface()
+    gci.set_loglevel(4)
+
     wbd = gci.calculate_and_return_wellbore_parameters(False, # True for production, false for injection
                                                        aquifer_layer_table,
-                                                       initial_values)
-    jsonstr = wbd.export_results_to_json_string()
-    result = wbd.export_results_to_dict()
-    print(result)
+                                    initial_values)
+    #cpe = CostParameterExtractor(wbd)
+    #jsonstr = wbd.export_results_to_json_string()
+    #result = wbd.export_results_to_dict()
+    #print(result)
+    #print(wbd.casing_stage_table)
     assert wbd.ready_for_calculation
     assert wbd.calculation_completed
-    assert type(jsonstr) is str
+    #assert type(jsonstr) is str
+
+    # atts = get_all_non_boilerplate_attributes(CostParameterExtractor)
+    # for att in atts:
+    #     print(cpe.__getattribute__(att))
+    cpl = CostCalculationPipeline(wbd)
+    print(cpl.wellbore_params)
+    

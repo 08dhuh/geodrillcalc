@@ -4,18 +4,14 @@ Stage 2. Define pump parameters
 Module responsible for defining pump parameters
 """
 import numpy as np
-# import logging
 from ..utils.utils import getlogger
 
 logger = getlogger()
 
 
-# TODO: do we need a method for determining the safety margin?
-
 
 def assign_pump_diameter(req_flow_rate_sec,):
-    # diameter_range=None,
-    # flow_rate_conditions=None):
+
     """
     Assigns pump diameter based on the required flow rate.
 
@@ -103,9 +99,6 @@ def calculate_pump_inlet_depth(groundwater_depth, allowable_drawdown, safety_mar
         The pump inlet depth is calculated by summing the groundwater depth (WD), allowable drawdown (Sw),
       safety margin (M), and the product of long-term decline rate (dS/dt) and bore/project lifetime (t).
     """
-    # Inlet or chamber
-    # Water depth WD, drawdown, margin, dS/dt, lifetime years
-    # Next step in 2-b
     pump_inlet_depth = groundwater_depth + allowable_drawdown + \
         safety_margin + long_term_decline_rate * bore_lifetime
     return pump_inlet_depth

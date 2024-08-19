@@ -7,14 +7,14 @@
     },
     "drilling_rate_error_margin_per_meter": 52.48
   },
-  "hourly_rates": {
+  "time_rates": {
     "rig_standby_rate": 1800,
     "development_bail_surge_jet_rate_per_hour": 625,
     "accommodation_meals_rate_per_day": 300,
     "site_telehandler_rate_per_day": 50,
     "site_generator_fuel_rate_per_day": 175
   },
-  "material_costs": {
+  "materials": {
     "cement_rate_per_cubic_meter": 168,
     "bentonite_rate_per_cubic_meter": 76,
     "drilling_fluid_lubricant_rate_per_cubic_meter": 117.50,
@@ -36,7 +36,7 @@
     "centraliser_rate_per_meter": 7.50,
     "packer_lowering_assembly_rate_base": 5200
   },
-  "other_costs": {
+  "others": {
     "disinfection_drilling_plant_rate": 1500,
     "mobilisation_demobilization_rate_per_day": 1000,
     "installation_grouting_pre_collar_rate_per_meter": 300,
