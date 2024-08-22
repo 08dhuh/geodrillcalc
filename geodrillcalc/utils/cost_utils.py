@@ -23,7 +23,7 @@ def populate_margin_functions(margin_dict: dict) -> pd.DataFrame:
     stages = list(margin_dict.keys())
     components = [list(inner_dict.keys()) for inner_dict in margin_dict.values()]
 
-    # Pre-allocate the DataFrame with the correct MultiIndex
+    # Pre-allocate the DataFrame with the correct MultiIndex for better performance
     index = pd.MultiIndex.from_tuples(
         [(stage, component) for stage, components_list in zip(stages, components) for component in components_list],
         names=["stage", "component"]
@@ -38,21 +38,3 @@ def populate_margin_functions(margin_dict: dict) -> pd.DataFrame:
                 )
 
     return pd1
-
-# def populate_margin_functions(margin_dict: dict) -> dict:
-#     if isinstance(margin_dict, dict):
-#         mar_dic = {}
-#         for key, item in margin_dict.items():
-#             mar_dic[key] = pd.DataFrame(item, index=[key])
-#     df = {}
-#     for key, item in mar_dic.items():
-#         mar = mar_dic[key] #dataframe
-#         df_label = pd.DataFrame(columns=['low','high'], index=item.index)
-#         for col in df_label.columns: #col: low, high
-#             df_label[col] = mar.apply( lambda row: \
-#                               lambda x: x * row[col] if row['is_rate_based'] 
-#                               else lambda x: x + row[col] 
-#                            ,axis=1)
-#         df[key] = df_label
-#     return df
-

@@ -4,6 +4,7 @@ from ..utils.utils import getlogger
 from ..utils.cost_utils import calculate_costs_with_df, populate_margin_functions
 
 # Constants for margin calculations
+#TODO: get rid of these
 PRE_COLLAR_MARGIN_RATE = 0.2  # 20% margin for pre-collar section
 CENTRALISER_COST_FACTOR_LOW = 2/3
 CENTRALISER_COST_FACTOR_HIGH = 1.5

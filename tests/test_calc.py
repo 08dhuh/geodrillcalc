@@ -68,7 +68,7 @@ def test_pipeline():
     with open('geodrillcalc/data/fallback_cost_rates.json') as f:
         cost_rates = json.load(f)
     cpl = CostCalculationPipeline(wbd, cost_rates)
-    #print(cpl.wellbore_params)
+
 
     with open('geodrillcalc/data/fallback_margin_rates.json') as f:
         md = json.load(f)
@@ -81,15 +81,10 @@ def test_pipeline():
         stage_labels=['drilling_rates', 'time_rates', 'materials', 'others']
     )
 
-    #print(wellbore_cost_calculator.margin_functions)
 
     # Calculate total cost
 
     total_cost_table = wellbore_cost_calculator.calculate_total_cost()
     print(total_cost_table)
     print(wellbore_cost_calculator.cost_estimation_table)
-    #assert not total_cost_table.empty
-
-
-    #assert not wellbore_cost_calculator.cost_estimation_table.empty
 
