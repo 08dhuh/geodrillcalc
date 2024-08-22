@@ -16,7 +16,7 @@ class CostParameterExtractor:
         return {
             "total_well_depth": self._total_well_depth,
             "section_lengths": self._section_lengths,
-            "section_diameters": self._get_section_diameters(outer=True),
+            "section_diameters": self._get_section_diameters(outer=True) * 1000,
         }
 
     @property
@@ -93,7 +93,7 @@ class CostParameterExtractor:
             return pd.Series(dtype='float64')
 
     @property
-    def _total_gravel_volume(self) -> float:
+    def _total_cement_volume(self) -> float:
         try:
             return self._section_annular_volumes.drop(['screen_riser', 'screen'], errors='ignore').sum()
         except (AttributeError, KeyError) as e:
@@ -101,7 +101,7 @@ class CostParameterExtractor:
             return 0
 
     @property
-    def _total_cement_volume(self) -> float:
+    def _total_gravel_volume(self) -> float:
         try:
             return self._section_annular_volumes.get('screen', 0)
         except (AttributeError, KeyError) as e:

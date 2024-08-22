@@ -1,10 +1,7 @@
 {
   "drilling_rates": {
     "pilot_hole_rate_per_meter": 185,
-    "other_drilling_rate": {
-      "coefficient": 1.5727,
-      "offset": -276.47
-    },
+    "diameter_based_offset": 276.47,
     "drilling_rate_error_margin_per_meter": 52.48
   },
   "time_rates": {
@@ -16,32 +13,36 @@
   },
   "materials": {
     "cement_rate_per_cubic_meter": 168,
+    "gravel_rate_per_cubic_meter": 84,
     "bentonite_rate_per_cubic_meter": 76,
-    "drilling_fluid_lubricant_rate_per_cubic_meter": 117.50,
+    "drilling_fluid_and_lubricant_rate_per_cubic_meter": 117.50,
     "drilling_mud_rate_per_cubic_meter": 62,
     "bore_table_flange_gate_valve_rate": 650,
     "cement_shoe_rate": 3700,
-    "pre_collar_rate": {
+    "pre_collar": {
       "coefficient": 125,
       "divisor": 450
     },
-    "casing_screen_riser_rate": {
+    "other_section": {
       "coefficient": 1.659,
       "offset": -43.38
     },
-    "injection_screen_rate": {
+    "screen": {
       "coefficient": 1.659,
       "offset": 106.62
     },
+    "bore_section_margin_rate": 41.85,
     "centraliser_rate_per_meter": 7.50,
-    "packer_lowering_assembly_rate_base": 5200
+    "packer_lowering_assembly_rate": 5200
   },
   "others": {
     "disinfection_drilling_plant_rate": 1500,
     "mobilisation_demobilization_rate_per_day": 1000,
     "installation_grouting_pre_collar_rate_per_meter": 300,
-    "logging_rate_per_meter": 11,
+    "wireline_logging_rate_per_meter": 11,
     "fabrication_installation_rate_per_meter": 75,
+    "cement_casing_rate_per_meter": 43,
+    "gravel_pack_rate_per_meter": 22,
     "subcontract_welders_rate_per_day": 200
   }
 }

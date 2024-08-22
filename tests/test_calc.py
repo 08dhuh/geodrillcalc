@@ -1,18 +1,10 @@
 #!/usr/bin/env python
 
-# def test_imports():
-#     import geodrillcalc.geodrillcalc as gdc
-
-# def debug_pipeline():
-#     import geodrillcalc.geodrillcalc as gdc
-#     aquifer_layer_table = {'aquifer_layer': ['102utqa', '111lta', '114bse'], 'is_aquifer': [True, True, False], 'depth_to_base': [47.0, 507.0, 807.0]}
-
-
 def test_pipeline():
-    import os
     import geodrillcalc.geodrillcalc as gdc
     from geodrillcalc.wellborecost.cost_parameter_extractor import CostParameterExtractor
     from geodrillcalc.wellborecost.wellborecost_pipeline import CostCalculationPipeline
+    from geodrillcalc.wellborecost.stage4_calc_cost import WellboreCostCalculator
     import json
 
     aquifer_layer_table = {
@@ -65,9 +57,9 @@ def test_pipeline():
     }
 
     gci = gdc.GeoDrillCalcInterface()
-    gci.set_loglevel(4)
+    gci.set_loglevel(0)
 
-    wbd = gci.calculate_and_return_wellbore_parameters(False, # True for production, false for injection
+    wbd = gci.calculate_and_return_wellbore_parameters(True, # True for production, false for injection
                                                        aquifer_layer_table,
                                     initial_values)
 
@@ -76,5 +68,28 @@ def test_pipeline():
     with open('geodrillcalc/data/fallback_cost_rates.json') as f:
         cost_rates = json.load(f)
     cpl = CostCalculationPipeline(wbd, cost_rates)
-    print(cpl.wellbore_params)
-    
+    #print(cpl.wellbore_params)
+
+    with open('geodrillcalc/data/fallback_margin_rates.json') as f:
+        md = json.load(f)
+
+    # Test WellboreCostCalculator
+    wellbore_cost_calculator = WellboreCostCalculator(
+        cost_rates=cost_rates,
+        wellbore_params=cpl.wellbore_params,
+        margins_dict=md,  
+        stage_labels=['drilling_rates', 'time_rates', 'materials', 'others']
+    )
+
+    #print(wellbore_cost_calculator.margin_functions)
+
+    # Calculate total cost
+
+    total_cost_table = wellbore_cost_calculator.calculate_total_cost()
+    print(total_cost_table)
+    print(wellbore_cost_calculator.cost_estimation_table)
+    #assert not total_cost_table.empty
+
+
+    #assert not wellbore_cost_calculator.cost_estimation_table.empty
+
