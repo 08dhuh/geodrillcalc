@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 def calculate_costs_with_df(base_values: dict, 
                             margin_functions: pd.DataFrame, 
@@ -38,3 +39,9 @@ def populate_margin_functions(margin_dict: dict) -> pd.DataFrame:
                 )
 
     return pd1
+
+
+def get_data_path(filename: str) -> str:
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    data_dir = os.path.join(current_dir, '..', 'data')
+    return os.path.join(data_dir, filename)

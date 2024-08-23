@@ -3,8 +3,8 @@
 def test_pipeline():
     import geodrillcalc.geodrillcalc as gdc
     from geodrillcalc.wellborecost.cost_parameter_extractor import CostParameterExtractor
-    from geodrillcalc.wellborecost.wellborecost_pipeline import CostCalculationPipeline
-    from geodrillcalc.wellborecost.stage4_calc_cost import WellboreCostCalculator
+    from geodrillcalc.wellborecost.wellborecost_pipeline import CostPipeline
+    from geodrillcalc.wellborecost.cost_stage_calculator import CostStageCalculator
     import json
 
     aquifer_layer_table = {
@@ -59,32 +59,44 @@ def test_pipeline():
     gci = gdc.GeoDrillCalcInterface()
     gci.set_loglevel(0)
 
-    wbd = gci.calculate_and_return_wellbore_parameters(True, # True for production, false for injection
+    wbd = gci.calculate_and_return_wellbore_parameters(False, # True for production, false for injection
                                                        aquifer_layer_table,
                                     initial_values)
-
+    #js = wbd.export_installation_results_to_json_string()
+    #assert isinstance(js, str)
     assert wbd.ready_for_calculation
-    assert wbd.calculation_completed
-    with open('geodrillcalc/data/fallback_cost_rates.json') as f:
-        cost_rates = json.load(f)
-    cpl = CostCalculationPipeline(wbd, cost_rates)
+    assert wbd.ready_for_installation_output
+    assert wbd.ready_for_cost_output
 
+    result = wbd.export_results_to_dict()
+    print(result)
+    #print(js)
 
-    with open('geodrillcalc/data/fallback_margin_rates.json') as f:
-        md = json.load(f)
+    # with open('geodrillcalc/data/fallback_cost_rates.json') as f:
+    #     cost_rates = json.load(f)
+    # with open('geodrillcalc/data/fallback_margin_rates.json') as f:
+    #     md = json.load(f)
+
+    #print(cpl.wellbore_params)
+
 
     # Test WellboreCostCalculator
-    wellbore_cost_calculator = WellboreCostCalculator(
-        cost_rates=cost_rates,
-        wellbore_params=cpl.wellbore_params,
-        margins_dict=md,  
-        stage_labels=['drilling_rates', 'time_rates', 'materials', 'others']
-    )
+    # wellbore_cost_calculator = WellboreCostCalculator(
+    #     cost_rates=cost_rates,
+    #     wellbore_params=cpl.wellbore_params,
+    #     margin_rates=md,  
+    #     stage_labels=['drilling_rates', 'time_rates', 'materials', 'others']
+    # )
 
+    #print(wellbore_cost_calculator.margin_functions)
 
     # Calculate total cost
 
-    total_cost_table = wellbore_cost_calculator.calculate_total_cost()
-    print(total_cost_table)
-    print(wellbore_cost_calculator.cost_estimation_table)
+    # total_cost_table = wellbore_cost_calculator.calculate_total_cost()
+    # print(total_cost_table)
+    # print(wellbore_cost_calculator.cost_estimation_table)
+    #assert not total_cost_table.empty
+
+
+    #assert not wellbore_cost_calculator.cost_estimation_table.empty
 

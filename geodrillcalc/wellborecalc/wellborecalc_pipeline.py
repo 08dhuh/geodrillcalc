@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from geodrillcalc.utils.calc_utils import find_next_largest_value, query_diameter_table
-from ..wellbore_dict import WellBoreDict
+from ..wellbore_data_store import WellBoreDataStore
 from . import stage1_calc_screen as ci, stage2_calc_pump as cp, stage3_calc_casing as cc
 from ..utils.utils import getlogger 
 
@@ -11,16 +11,16 @@ from ..utils.utils import getlogger
 
 class CalcPipeline:
     """
-    A class designed to calculate wellbore model parameters using a WellBoreDict instance.
+    A class designed to calculate wellbore model parameters using a WellBoreDataStore instance.
 
-    This class requires a fully instantiated and initialised WellBoreDict instance, 
-    achieved through the WellBoreDict.initialise method.
-    The WellBoreDict instance attributes are updated in three consecutive calls to the class methods.
+    This class requires a fully instantiated and initialised WellBoreDataStore instance, 
+    achieved through the WellBoreDataStore.initialise method.
+    The WellBoreDataStore instance attributes are updated in three consecutive calls to the class methods.
 
-    The CalcPipeline class is intended to be used in conjunction with the WellBoreDict instance, 
+    The CalcPipeline class is intended to be used in conjunction with the WellBoreDataStore instance, 
     collaborating to calculate wellbore parameters.
-    All calculations operate on WellBoreDict's internal class attributes, initialised in advance. 
-    Results are stored within the same WellBoreDict instance.
+    All calculations operate on WellBoreDataStore's internal class attributes, initialised in advance. 
+    Results are stored within the same WellBoreDataStore instance.
 
     For the casing stage, an additional argument is required, 
     distinguishing between production and injection pumps 
@@ -83,17 +83,17 @@ class CalcPipeline:
         }
 
     Usage Example:
-    wbd = WellBoreDict()
+    wbd = WellBoreDataStore()
     wbd.initialise_and_validate_input_params(aquifer_layer_table=aquifer_layer_table, **initial_values)  
     
     calc_injectionpipe = CalcPipeline(wbd)
     calc_injectionpipe.calc_pipeline(is_production_well=True)
     """
 
-    def __init__(self, wellboredict: WellBoreDict, logger=None):
+    def __init__(self, wellboredict: WellBoreDataStore, logger=None):
         self.wbd = wellboredict  # wellboredict must be a fully initialised instance
         if not self.wbd.ready_for_calculation:
-            raise RuntimeError(f"Input parameters must be assigned to WellBoreDict object before calling the current class {self.__name__}")
+            raise RuntimeError(f"Input parameters must be assigned to WellBoreDataStore object before calling the current class {self.__name__}")
         self.casing_diameters_in_metres = self.wbd.get_casing_diameters()
         self.drilling_diameters_in_metres = self.wbd.get_drilling_diameters()
         self.logger = logger or getlogger()
@@ -101,11 +101,12 @@ class CalcPipeline:
     def calc_pipeline(self):
         logger = self.logger
         try:
-            setattr(self.wbd,'calculation_completed',False)            
+            self.wbd.ready_for_installation_output = False         
             self._screen_pipeline()
             self._pump_pipeline()
             self._casing_pipeline()
-            setattr(self.wbd,'calculation_completed',True)
+            #setattr(self.wbd,'calculation_completed',True)
+            self.wbd.ready_for_installation_output = True
         except ValueError as e:
             logger.error(f"An error occurred during calculation: {str(e)}")
             raise ValueError from e
@@ -193,7 +194,7 @@ class CalcPipeline:
         
         ir['screen_diameter'] = screen_diameter
         ir['open_hole_diameter'] = ohd
-        wbd._assign_input_params(ir.keys(), **ir)
+        wbd.assign_parameters('installation', **ir)
         # for key, value in ir.items():
         #     print(f"{key}: {value}")
         
@@ -213,7 +214,7 @@ class CalcPipeline:
             cp.calculate_minimum_pump_housing_diameter(wbd.required_flow_rate_per_m3_sec,
                                                        pump_diameter
                                                        )
-        wbd._assign_input_params(pr.keys(), **pr)
+        wbd.assign_parameters('installation', **pr)
         # for key, value in pr.items():
         #     print(f"{key}: {value}")
 

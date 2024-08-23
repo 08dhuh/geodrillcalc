@@ -4,7 +4,7 @@ from ..utils.utils import getlogger
 from ..utils.cost_utils import calculate_costs_with_df, populate_margin_functions
 
 # Constants for margin calculations
-#TODO: get rid of these
+# TODO: get rid of these magic numbers
 PRE_COLLAR_MARGIN_RATE = 0.2  # 20% margin for pre-collar section
 CENTRALISER_COST_FACTOR_LOW = 2/3
 CENTRALISER_COST_FACTOR_HIGH = 1.5
@@ -12,24 +12,28 @@ CENTRALISER_DEPTH_OFFSET_LOW = -20
 CENTRALISER_DEPTH_OFFSET_HIGH = 20
 
 
-class WellboreCostCalculator:
+class CostStageCalculator:
+    """
+    stores calculation methods required for the cost calculation pipeline.
+    """
+
     def __init__(self,
                  cost_rates,
                  wellbore_params,
-                 margins_dict,
+                 margin_rates,
                  stage_labels):
         self.logger = getlogger()
         self.cost_rates = cost_rates
         self.wellbore_params = wellbore_params
         self.stage_labels = stage_labels
-        self.margin_functions = self._initialise_margin_functions(margins_dict)
-        self.cost_estimation_table = pd.DataFrame(
-            columns=['low', 'base', 'high'],
-            index=pd.MultiIndex.from_product(
-                [self.stage_labels, []], names=['stage', 'components'])
-        )
+        self.margin_functions = self._initialise_margin_functions(margin_rates)
 
-        self._total_cost_table = pd.DataFrame(columns=['low', 'base', 'high'])
+        self.stage_calculators = {
+            'drilling_rates': self.calculate_drilling_components_cost,
+            'time_rates': self.calculate_time_components_cost,
+            'materials': self.calculate_material_components_cost,
+            'others': self.calculate_other_components_cost
+        }
 
     @property
     def drilling_rate_params(self):
@@ -62,46 +66,53 @@ class WellboreCostCalculator:
     @property
     def other_cost_rates(self):
         return self.cost_rates['others']
-    
+
     def _initialise_margin_functions(self, margins_dict) -> pd.DataFrame:
         return populate_margin_functions(margins_dict)
 
-    def calculate_drilling_rates(self) -> pd.Series:
+    def calculate_drilling_components_cost(self) -> pd.DataFrame:
         try:
             total_well_depth = self.drilling_rate_params["total_well_depth"]
-            drilling_section_data = pd.concat([self.drilling_rate_params['section_lengths'],
-                                               self.drilling_rate_params['section_diameters']], axis=1)
-            drilling_section_data.columns = ['length', 'diameter']
+            drilling_section_length_diameter = pd.concat([self.drilling_rate_params['section_lengths'],
+                                                          self.drilling_rate_params['section_diameters']], axis=1)
+            drilling_section_length_diameter.columns = ['length', 'diameter']
 
             pilot_hole_cost = total_well_depth * \
                 self.drilling_cost_rates['pilot_hole_rate_per_meter']
-            
-            drilling_section_result = pd.Series(pilot_hole_cost, index=['pilot_hole'])
 
-            #temporary series data
-            sr = drilling_section_data.apply(
+            drilling_section_result = pd.DataFrame({
+                'base': [pilot_hole_cost]
+            }, index=['pilot_hole'])
+
+            casing_stages_result = drilling_section_length_diameter.apply(
                 lambda row: max(row['length'] * (
                     np.pi / 2 * row['diameter'] - self.drilling_cost_rates['diameter_based_offset']), 0), axis=1)
 
-            drilling_section_result = pd.concat([drilling_section_result, sr], axis=0)
+            casing_stages_result = pd.DataFrame({
+                'base': casing_stages_result
+            })
+            drilling_section_result = pd.concat(
+                [drilling_section_result, casing_stages_result], axis=0)
 
-            for component, value in drilling_section_result.items():
-                self.cost_estimation_table.loc[('drilling_rates', component), 'base'] = value
-            base_sum = drilling_section_result.sum()
-            cost_margin = total_well_depth * \
-                self.drilling_cost_rates['drilling_rate_error_margin_per_meter']
-            cost_low = base_sum - cost_margin
-            cost_high = base_sum + cost_margin
+            drilling_section_result[['low', 'high']] = np.nan
+            drilling_section_result = drilling_section_result[[
+                'low', 'base', 'high']]
 
-            return pd.Series([cost_low, base_sum, cost_high], index=['low', 'base', 'high'])
-
+            return drilling_section_result
         except KeyError as e:
             self.logger.error(
                 f"Error in calculating drilling rates: {e} at line {e.__traceback__.tb_lineno}")
             raise
 
+    def calculate_drilling_rates_total_cost(self,
+                                            base_sum) -> pd.Series:
+        cost_margin = self.drilling_rate_params["total_well_depth"] * \
+            self.drilling_cost_rates['drilling_rate_error_margin_per_meter']
+        cost_low = base_sum - cost_margin
+        cost_high = base_sum + cost_margin
+        return pd.Series([cost_low, base_sum, cost_high], index=['low', 'base', 'high'])
 
-    def calculate_time_rates(self) -> pd.Series:
+    def calculate_time_components_cost(self) -> pd.DataFrame:
         try:
             flow_rate = self.time_rate_params["required_flow_rate"]
             drilling_time = self.time_rate_params["drilling_time"]
@@ -119,17 +130,14 @@ class WellboreCostCalculator:
                 index_labels=base_costs.keys()
             )
 
-            for component in time_rates_df.index:
-                self.cost_estimation_table.loc[('time_rates', component), ['low','base','high']] =\
-                      time_rates_df.loc[component]
-            return time_rates_df.sum(axis=0)
+            return time_rates_df
 
         except (ValueError, KeyError) as e:
             self.logger.error(
                 f"Error in calculating time rates: {e} at line {e.__traceback__.tb_lineno}")
             raise
 
-    def calculate_material_costs(self) -> pd.Series:
+    def calculate_material_components_cost(self) -> pd.DataFrame:
         try:
             total_well_depth = self.material_params["total_well_depth"]
             section_lengths = self.material_params["section_lengths"]
@@ -189,7 +197,7 @@ class WellboreCostCalculator:
                 [material_costs_df, bore_section_costs])
 
             total_well_depth_without_screen = section_lengths.iloc[:-2].sum()
-            #append centraliser
+            # append centraliser
             centraliser_row = {
                 'low': max(self.material_cost_rates['centraliser_rate_per_meter'] * CENTRALISER_COST_FACTOR_LOW * (total_well_depth_without_screen + CENTRALISER_DEPTH_OFFSET_LOW), 0),
                 'base': self.material_cost_rates['centraliser_rate_per_meter'] * total_well_depth,
@@ -198,19 +206,13 @@ class WellboreCostCalculator:
             material_costs_df = pd.concat(
                 [material_costs_df, pd.DataFrame(centraliser_row, index=['centraliser'])])
 
-
-            # Update the multi-indexed dataframe
-            for component in material_costs_df.index:
-                self.cost_estimation_table.loc[('materials', component), ['low','base','high']] = material_costs_df.loc[component]
-            
-            return material_costs_df.sum(axis=0)
-
+            return material_costs_df
         except KeyError as e:
             self.logger.error(
                 f"Error in calculating material costs: {e} at line {e.__traceback__.tb_lineno}")
             raise
 
-    def calculate_other_costs(self) -> pd.Series:
+    def calculate_other_components_cost(self) -> pd.DataFrame:
 
         try:
             total_well_depth = self.other_params["total_well_depth"]
@@ -236,34 +238,12 @@ class WellboreCostCalculator:
                 index_labels=base_costs.keys()
             )
 
-            for component in other_costs_df.index:
-                self.cost_estimation_table.loc[('others', component), ['low','base','high']] = other_costs_df.loc[component]
-
-            return other_costs_df.sum(axis=0)
-
+            return other_costs_df
         except KeyError as e:
             self.logger.error(
                 f"Error in calculating other costs: {e} at line {e.__traceback__.tb_lineno}")
-            raise  
+            raise
         except Exception as e:
             self.logger.error(
                 f"Error in calculating other costs: {e} at line {e.__traceback__.tb_lineno}")
-            raise  
-        
-    @property
-    def total_cost_table(self) -> pd.DataFrame:
-        if self._total_cost_table.empty:
-            self._populate_total_cost_table()
-        return self._total_cost_table
-
-    def _populate_total_cost_table(self) -> None:
-        self._total_cost_table.loc['drilling_rates'] = self.calculate_drilling_rates(
-        )
-        self._total_cost_table.loc['time_rates'] = self.calculate_time_rates()
-        self._total_cost_table.loc['materials'] = self.calculate_material_costs()
-        self._total_cost_table.loc['others'] = self.calculate_other_costs()
-        self._total_cost_table.loc['total_cost'] = self._total_cost_table.sum(
-            axis=0)
-
-    def calculate_total_cost(self):
-        return self.total_cost_table
+            raise

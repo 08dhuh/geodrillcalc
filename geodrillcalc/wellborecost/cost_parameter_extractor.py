@@ -1,11 +1,11 @@
 import pandas as pd
 import numpy as np
 
-from ..wellbore_dict import WellBoreDict
+from ..wellbore_data_store import WellBoreDataStore
 from ..utils.utils import getlogger
 
 class CostParameterExtractor:
-    def __init__(self, wbd: WellBoreDict) -> None:
+    def __init__(self, wbd: WellBoreDataStore) -> None:
         self.wbd = wbd
         self.is_production_well = wbd.is_production_well
         self.logger = getlogger()
