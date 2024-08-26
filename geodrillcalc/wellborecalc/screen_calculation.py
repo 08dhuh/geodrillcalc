@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import numpy as np
-from ..utils.utils import getlogger, find_next_largest_value, query_diameter_table
+
+from geodrillcalc.utils.calc_utils import find_next_largest_value, query_diameter_table
+from ..utils.utils import getlogger 
+
 
 logger = getlogger()
 
@@ -13,17 +16,25 @@ def is_water_corrosive(temperature_k: float,
     """
     Calculates the Langelier Saturation Index (LSI) of geothermal water.
 
-    --------------------------------------------------------
-    Input Parameters
-        temperature_k: (float) temperature of the water as Kelvin, must be in the range of 273 <= T <=363
-        pH: (float) pH of the water
-        calcium_ion_concentration: (float) calcium ion concentration as ppm
-        carbonate_ion_concentration: (float) carbonate ion concentration as
-        total_dissolved_solids: (float) TDS (ppm)
+    The LSI is used to evaluate the corrosive potential of water based on its chemistry.
 
-    --------------------------------------------------------
-    Returns:
-        LSI: (float) Langelier saturation index(LSI)
+    Parameters
+    ----------
+    temperature_k : float
+        Temperature of the water in Kelvin, must be in the range of 273 <= T <= 363.
+    pH : float
+        pH level of the water.
+    calcium_ion_concentration : float
+        Calcium ion concentration in ppm.
+    carbonate_ion_concentration : float
+        Carbonate ion concentration in ppm.
+    total_dissolved_solids : float
+        Total dissolved solids (TDS) in ppm.
+
+    Returns
+    -------
+    float
+        Langelier Saturation Index (LSI), which indicates the water's tendency to precipitate or dissolve calcium carbonate.
     """
     # TODO: Check if the temperature input is in the valid range
 
@@ -51,7 +62,6 @@ def is_water_corrosive(temperature_k: float,
 
 # ================================================================
 # Stage 1. Define parameters for screened interval
-# TODO: test with the whole casing diameter list
 
 
 def calculate_minimum_screen_length(req_flow_rate: float,
@@ -67,22 +77,31 @@ def calculate_minimum_screen_length(req_flow_rate: float,
     based on Eq 4 at http://quebec.hwr.arizona.edu/classes/hwr431/2006/Lab6.pdf
     If it is an injection bore, screen length is multiplied by 2.0 
     and capped at total aquifer thickness.      
-    --------------------------------------------------------
-    Input Parameters
-        i.	Required flow rate, Q (m3/day)
-        ii.	Aquifer hydraulic conductivity, K (m/day)
-        iii. Bore/project lifetime, t (days)
-        iv. Aquifer thickness, Z (m)
-        v.	Allowable drawdown, Sw (m) default: Sw = 25 m
-        vi.	Bore radius, r (m) , default: r = 0.0762 m (3”)
-        vii.	Aquifer specific storage, Ss (m-1) , default: Ss = 2x10-4 m-1
-        viii.	Production or injection bore? True for production
-    --------------------------------------------------------
+    
+    Parameters
+    ----------
+    req_flow_rate : float
+        Required flow rate in cubic metres per day (m3/day).
+    hyd_conductivity : float
+        Hydraulic conductivity of the aquifer in metres per day (m/day).
+    bore_lifetime : float
+        Projected lifetime of the bore in days.
+    aquifer_thickness : float
+        Thickness of the aquifer in metres.
+    is_production_well : bool
+        Indicates if the well is a production well (True) or an injection well (False).
+    allowable_drawdown : float, optional
+        Allowable drawdown in metres, default is 25 m.
+    bore_radius : float, optional
+        Radius of the bore in metres, default is 0.0762 m (3 inches).
+    specific_storage : float, optional
+        Specific storage of the aquifer in inverse metres (m-1), default is 2x10-4 m-1.
+
     Returns
-        SL: (float) nominal value of the minimum screen length (metres)
-        error: (tuple) lower and upper limits representing the uncertainty bounds
+    -------
+    tuple
+        A tuple containing the minimum screen length (float) and a tuple of error bounds (lower, upper).
     """
-    #
     screen_length = (2.3*req_flow_rate / (4*np.pi*hyd_conductivity*allowable_drawdown)) \
         * np.log10(2.25*hyd_conductivity*bore_lifetime/(bore_radius**2 * specific_storage))
     if not is_production_well:
@@ -103,16 +122,21 @@ def calculate_casing_friction(depth_to_top_screen: float,
     Estimates production casing friction loss above aquifer
     for nominal diameters (e.g. 101.6, 127, 152.4, 203.2, 254, 304.8 mm)
 
-    ----------------------------------------------------------------
-    Input Parameters:
-        depth_to_top_screen: (float) Depth to top of screen in metres (m).
-        req_flow_rate: (float) Required flow rate in cubic metres per second (m^3/s).
-        casing_diameter: (float or np.ndarray) Casing diameter in metres (m).
-        pipe_roughness_coeff: (float) Pipe roughness coefficient, default: 100 for steel
+    Parameters
+    ----------
+    depth_to_top_screen : float
+        Depth to the top of the screen in metres.
+    req_flow_rate : float
+        Required flow rate in cubic metres per second (m^3/s).
+    casing_diameter : float or np.ndarray
+        Diameter of the casing in metres.
+    pipe_roughness_coeff : float, optional
+        Pipe roughness coefficient, default is 100 for steel.
 
-    ----------------------------------------------------------------
-    Returns:
-        hfpc: (float) production casing friction loss (metres)
+    Returns
+    -------
+    float
+        The calculated friction loss in metres.
     """
     hfpc = (10.67*depth_to_top_screen*req_flow_rate**1.852) / \
         (pipe_roughness_coeff**1.852 * casing_diameter**4.8704)
@@ -127,20 +151,21 @@ def calculate_minimum_screen_diameter(up_hole_frictions: np.ndarray,
     Determines the minimum screen diameter, SDmin (m), using the Hazen-Williams equation to ensure up-hole friction is less than 20 m.
     Reference: https://en.wikipedia.org/wiki/Hazen%E2%80%93Williams_equation#SI_units
 
-    Parameters:
-    - up_hole_friction: (np.ndarray) Up-hole friction in m. Must be smaller than 20; otherwise, np.nan is returned.
-    - screen_length: (float) Length of the screen in metres (m).
-    - req_flow_rate: (float) Required flow rate in seconds (m^3/s).
-    - pipe_roughness_coeff: (float, optional) Pipe roughness coefficient, default: 100.
+    Parameters
+    ----------
+    up_hole_frictions : np.ndarray
+        Array of up-hole friction losses in metres. Values must be less than 20; otherwise, np.nan is returned.
+    screen_length : float
+        Length of the screen in metres.
+    req_flow_rate : float
+        Required flow rate in cubic metres per second (m^3/s).
+    pipe_roughness_coeff : float, optional
+        Pipe roughness coefficient, default is 100.
 
-    Returns:
-    - d: (float) Minimum screen diameter (SDmin) in metres (m) to ensure up-hole friction is less than 20. 
-    Returns np.nan if up-hole friction is smaller than 20.
-
-    ----------------------------------------------------------------
-    Notes:
-    - The Hazen-Williams equation is used to calculate friction loss in a pipe.
-    - The minimum screen diameter is determined to ensure that the up-hole friction does not exceed 20 m.
+    Returns
+    -------
+    np.ndarray
+        Array of minimum screen diameters in metres. Returns np.nan for friction values that are too high.
     """
     high_friction_mask = up_hole_frictions > 20
 
@@ -161,19 +186,24 @@ def calculate_total_casing(prod_casing_diameter: float,
     """
     Calculates the total casing length required, including production casing and screen, based on given parameters.
 
-    ----------------------------------------------------------------
-    Parameters:
-        prod_casing_diameter: (float) Production casing diameter in metres.
-        screen_diameter: (float or np.nan) Screen diameter in metres.
-        intermediate_casing: (float) Length of intermediate casing, typically (LMTA - 10) in metres.
-        screen_length: (float) Length of the production screen in metres.
+    Parameters
+    ----------
+    prod_casing_diameter : float
+        Diameter of the production casing in metres.
+    screen_diameter : float
+        Diameter of the screen in metres. If invalid or larger than the production casing diameter, np.nan is returned.
+    intermediate_casing : float
+        Length of intermediate casing in metres, typically measured from LMTA minus 10 metres.
+    screen_length : float
+        Length of the screen in metres.
 
-    ----------------------------------------------------------------
-    Returns:
-        (float) Total casing length required in metres.
-        or np.nan if the screen diameter is an invalid value or greater than the production casing diameter.
-
+    Returns
+    -------
+    float
+        Total length of casing required in metres. 
+        Returns np.nan if screen diameter is invalid or too large.
     """
+
     nanflag = False
     if prod_casing_diameter <= screen_diameter:
         logger.debug(
@@ -196,24 +226,27 @@ def calculate_minimum_open_hole_diameter(req_flow_rate_sec,
                                          ngr_aquifer=1
                                          ):
     """
-    Defines variable values to calculate minimum open hole diameter (OHD):
-        i. Q = required flow rate (m^3/s)
-        ii. 𝜙 = average reservoir porosity (0–1)
-        iii. NGR = net-to-gross ratio for the aquifer, default: 1 (K for Gippsland aquifer units is already averaged)
-        iv. SL = screen length (m) from Step 3
+    Calculates the minimum open hole diameter (OHD) required to meet the specified flow rate.
 
-    Input Parameters:
-        req_flow_rate_sec: (float) Required flow rate in cubic metres per second (m^3/s).
-        screen_length: (float) Length of the production or injection screen in metres (m).
-        sand_face_velocity: (float) Sand face velocity in m/s.
-        reservoir_porosity: (float) Average reservoir porosity (0–1).
-        ngr_aquifer: (float, optional) Net-to-gross ratio for the aquifer, default: 1 (K for Gippsland aquifer units is already averaged).
+    Parameters
+    ----------
+    req_flow_rate_sec : float
+        Required flow rate in cubic metres per second (m^3/s).
+    screen_length : float
+        Length of the screen in metres.
+    sand_face_velocity : float
+        Sand face velocity in metres per second (m/s).
+    reservoir_porosity : float
+        Average reservoir porosity (0 to 1).
+    ngr_aquifer : float, optional
+        Net-to-gross ratio for the aquifer, default is 1.
 
-    Returns:
-        ohd_min: (float) Minimum open hole diameter (OHD) required to meet the specified flow rate, in metres (m).
-
+    Returns
+    -------
+    float
+        Minimum open hole diameter in metres.
     """
-    # TODO: prod/injection : sand face velocity differs
+
     ohd_min = req_flow_rate_sec / \
         (sand_face_velocity * np.pi * reservoir_porosity * ngr_aquifer * screen_length)
     return ohd_min
@@ -223,15 +256,19 @@ def calculate_open_hole_diameter(ohd_min: float,
                                  drilling_diameters_in_metres: list | np.ndarray,
                                  ) -> float:
     """
-    Defines variable values to calculate open hole diameter (OHD):
+    Determines the open hole diameter based on the minimum required diameter and available standard bit sizes.
 
-    Input Parameters:
-        i. ohd_min = minimum open hole diameter calculated with calculate_minimum_open_hole_diameter (m)
-        ii. drilling_diameters_in_metres: list or np.ndarray (m) 
+    Parameters
+    ----------
+    ohd_min : float
+        Minimum open hole diameter in metres.
+    drilling_diameters_in_metres : list or np.ndarray
+        List or array of standard drilling diameters in metres.
 
-    Returns:
-        open_hole_diameter: (float) open hole diameter (OHD), either next largest standard bit size > OHDmin
-    or if OHD < SD (from Step 4.f), then OHD = next largest standard bit size > SD
+    Returns
+    -------
+    float
+        The open hole diameter in metres, which is the next largest standard bit size greater than the minimum required diameter.
     """
 
     ohd = find_next_largest_value(
@@ -244,9 +281,21 @@ def calibrate_open_hole_diameter(ohd: float,
                                  casing_diameter_table
                                  ):
     """
+    Calibrates the open hole diameter to ensure it is suitable for the given screen diameter.
 
-    Returns:
-    calibrated open hole diameter
+    Parameters
+    ----------
+    ohd : float
+        Current open hole diameter in metres.
+    screen_diameter : float
+        Diameter of the screen in metres.
+    casing_diameter_table : DataFrame
+        DataFrame containing standard casing diameters and related data.
+
+    Returns
+    -------
+    float
+        Calibrated open hole diameter in metres.
     """
     if ohd < screen_diameter:
         ohd = query_diameter_table(screen_diameter,

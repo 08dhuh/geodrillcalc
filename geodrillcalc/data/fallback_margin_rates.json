@@ -1,0 +1,113 @@
+{
+  "time_rates": {
+    "rig_standby_cost": {
+      "low": -200,
+      "high": 200,
+      "is_rate_based": false
+    },
+    "development_bail_surge_jet": {
+      "low": 0.8,
+      "high": 1.2,
+      "is_rate_based": true
+    },
+    "accommodation_cost": {
+      "low": 0.9,
+      "high": 1.1,
+      "is_rate_based": true
+    },
+    "site_telehandler_cost": {
+      "low": 0.9,
+      "high": 1.1,
+      "is_rate_based": true
+    },
+    "site_generator_fuel_cost": {
+      "low": 0.8,
+      "high": 1.2,
+      "is_rate_based": true
+    }
+  },
+  "materials": {
+    "cement": {
+      "low": 0.86,
+      "high": 1.14,
+      "is_rate_based": true
+    },
+    "gravel": {
+      "low": 0.86,
+      "high": 1.15,
+      "is_rate_based": true
+    },
+    "bentonite": {
+      "low": 0.90,
+      "high": 1.10,
+      "is_rate_based": true
+    },
+    "drilling_fluid_and_lubricants": {
+      "low": 0.90,
+      "high": 1.10,
+      "is_rate_based": true
+    },
+    "drilling_mud": {
+      "low": 0.90,
+      "high": 1.10,
+      "is_rate_based": true
+    },
+    "bore_flange_and_valve_spec": {
+      "low": -50,
+      "high": 50,
+      "is_rate_based": false
+    },
+    "cement_shoe": {
+      "low": 0.90,
+      "high": 1.10,
+      "is_rate_based": true
+    },
+    "packer_lowering_assembly": {
+      "low": 0.90,
+      "high": 1.10,
+      "is_rate_based": true
+    }
+  },
+  "others": {
+    "disinfection_drilling_plant": {
+      "low": 1.00,
+      "high": 1.00,
+      "is_rate_based": true
+    },
+    "mobilisation_demobilization": {
+      "low": 1.00,
+      "high": 1.00,
+      "is_rate_based": true
+    },
+    "installation_grouting_pre_collar": {
+      "low": 1.00,
+      "high": 1.00,
+      "is_rate_based": true
+    },
+    "wireline_logging": {
+      "low": 0.90,
+      "high": 1.10,
+      "is_rate_based": true
+    },
+    "fabrication_installation": {
+      "low": 0.90,
+      "high": 1.10,
+      "is_rate_based": true
+    },
+    "cement_casing": {
+      "low": 0.80,
+      "high": 1.20,
+      "is_rate_based": true
+    },
+    "gravel_pack": {
+      "low": 0.80,
+      "high": 1.20,
+      "is_rate_based": true
+    },
+    "subcontract_welders": {
+      "low": 0.90,
+      "high": 1.10,
+      "is_rate_based": true
+    }
+  }
+}
