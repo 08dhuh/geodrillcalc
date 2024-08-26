@@ -31,7 +31,7 @@ class WellBoreDataStore:
     __init__(self, is_production_well:bool, logger=None):
         Instantiates and initialises the WellBoreDataStore instance with pre-defined values.
 
-    initialise_and_validate_input_params(self, \*\*kwargs):
+    initialise_and_validate_input_params(self, **kwargs):
         Initialises and validates the input data for wellbore calculations.
 
     export_results_to_dict(self, to_json=False):
@@ -350,7 +350,7 @@ class WellBoreDataStore:
         ----------
         stage : str or int
             Indicates the calculation stage ('installation', 'cost', etc., or 0, 1).
-        \*\*kwargs : dict
+        **kwargs : dict
             Dictionary containing the values to assign to attributes.
 
         Raises
