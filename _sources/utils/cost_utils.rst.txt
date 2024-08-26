@@ -1,0 +1,9 @@
+Cost Utils
+==============
+
+This section covers utility functions related to cost calculations within the project.
+
+.. automodule:: geodrillcalc.utils.cost_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

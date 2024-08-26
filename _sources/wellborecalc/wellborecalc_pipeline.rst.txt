@@ -1,0 +1,9 @@
+Wellbore Calculation Pipeline
+=============================
+
+This section describes the pipeline for wellbore calculations.
+
+.. automodule:: geodrillcalc.wellborecalc.wellborecalc_pipeline
+   :members:
+   :undoc-members:
+   :show-inheritance:

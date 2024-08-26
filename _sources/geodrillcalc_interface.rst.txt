@@ -1,0 +1,10 @@
+GeoDrillCalc Interface
+=======================
+
+This section documents the `GeoDrillCalc` interface module, which provides the main interface for wellbore parameter calculations.
+
+.. automodule:: geodrillcalc.geodrillcalc_interface
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

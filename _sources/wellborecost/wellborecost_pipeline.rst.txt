@@ -1,0 +1,9 @@
+Wellbore Cost Pipeline
+======================
+
+This section explains the cost calculation pipeline for wellbores.
+
+.. automodule:: geodrillcalc.wellborecost.wellborecost_pipeline
+   :members:
+   :undoc-members:
+   :show-inheritance:

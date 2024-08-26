@@ -1,0 +1,9 @@
+Utils
+=========
+
+This section describes various utility functions used throughout the project.
+
+.. automodule:: geodrillcalc.utils.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

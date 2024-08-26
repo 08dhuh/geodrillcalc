@@ -1,0 +1,9 @@
+Screen Calculation
+==================
+
+This section details the screen calculation process within the wellbore calculation pipeline.
+
+.. automodule:: geodrillcalc.wellborecalc.screen_calculation
+   :members:
+   :undoc-members:
+   :show-inheritance:
