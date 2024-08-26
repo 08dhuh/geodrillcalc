@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Wellbore Calculation Pipeline &#8212; geodrillcalc 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=c058f7c8" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Wellbore Cost Pipeline" href="../wellborecost/wellborecost_pipeline.html" />
+    <link rel="prev" title="Wellbore Data Store" href="../wellbore_data_store.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="wellbore-calculation-pipeline">
+<h1>Wellbore Calculation Pipeline<a class="headerlink" href="#wellbore-calculation-pipeline" title="Link to this heading">¶</a></h1>
+<p>This section describes the pipeline for wellbore calculations.</p>
+<dl class="py class" id="module-geodrillcalc.wellborecalc.wellborecalc_pipeline">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecalc.wellborecalc_pipeline.CalcPipeline">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geodrillcalc.wellborecalc.wellborecalc_pipeline.</span></span><span class="sig-name descname"><span class="pre">CalcPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wellboredict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../wellbore_data_store.html#geodrillcalc.wellbore_data_store.WellBoreDataStore" title="geodrillcalc.wellbore_data_store.WellBoreDataStore"><span class="pre">WellBoreDataStore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.wellborecalc.wellborecalc_pipeline.CalcPipeline" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class designed to calculate wellbore model parameters using a WellBoreDataStore instance.</p>
+<p>This class requires a fully instantiated and initialised WellBoreDataStore instance, 
+achieved through the WellBoreDataStore.initialise method.
+The WellBoreDataStore instance attributes are updated in three consecutive calls to the class methods.</p>
+<p>The CalcPipeline class is intended to be used in conjunction with the WellBoreDataStore instance, 
+collaborating to calculate wellbore parameters.
+All calculations operate on WellBoreDataStore’s internal class attributes, initialised in advance. 
+Results are stored within the same WellBoreDataStore instance.</p>
+<p>For the casing stage, an additional argument is required, 
+distinguishing between production and injection pumps</p>
+<section id="method-overview">
+<h2>Method Overview<a class="headerlink" href="#method-overview" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>_screen_pipeline: Calculates interval parameters.</p></li>
+<li><p>_pump_pipeline: Calculates pump parameters.</p></li>
+<li><p>_casing_pipeline: Calculates casing parameters. Requires a boolean argument (True for production pump, False for injection pump).</p></li>
+<li><p>calc_pipeline: Encapsulates the pipeline methods in a single method.</p></li>
+</ol>
+</section>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>aquifer_layer_table<span class="classifier">dict</span></dt><dd><p>A dictionary containing details about aquifer layers.</p>
+</dd>
+<dt>initial_values<span class="classifier">dict</span></dt><dd><p>A dictionary containing initial values for wellbore calculations.</p>
+</dd>
+</dl>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wbd</span> <span class="o">=</span> <span class="n">WellBoreDataStore</span><span class="p">()</span>
+<span class="n">wbd</span><span class="o">.</span><span class="n">initialise_and_validate_input_params</span><span class="p">(</span><span class="n">aquifer_layer_table</span><span class="o">=</span><span class="n">aquifer_layer_table</span><span class="p">,</span> <span class="o">**</span><span class="n">initial_values</span><span class="p">)</span>
+<span class="n">calc_injectionpipe</span> <span class="o">=</span> <span class="n">CalcPipeline</span><span class="p">(</span><span class="n">wbd</span><span class="p">)</span>
+<span class="n">calc_injectionpipe</span><span class="o">.</span><span class="n">calc_pipeline</span><span class="p">(</span><span class="n">is_production_well</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecalc.wellborecalc_pipeline.CalcPipeline.calc_pipeline">
+<span class="sig-name descname"><span class="pre">calc_pipeline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.wellborecalc.wellborecalc_pipeline.CalcPipeline.calc_pipeline" title="Link to this definition">¶</a></dt>
+<dd><p>Executes the complete calculation pipeline for wellbore data.</p>
+<p>This method sequentially calls the _screen_pipeline, _pump_pipeline, and _casing_pipeline
+methods to perform all necessary calculations on the WellBoreDataStore instance.</p>
+<section id="raises">
+<h3>Raises<a class="headerlink" href="#raises" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If an error occurs during any calculation stage.</p>
+</dd>
+<dt>ZeroDivisionError</dt><dd><p>If a zero division error occurs during interval calculations.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">geodrillcalc</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../geodrillcalc_interface.html">GeoDrillCalc Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellbore_data_store.html">Wellbore Data Store</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Wellbore Calculation Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.wellborecalc.wellborecalc_pipeline.CalcPipeline"><code class="docutils literal notranslate"><span class="pre">CalcPipeline</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecost/wellborecost_pipeline.html">Wellbore Cost Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="screen_calculation.html">Screen Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pump_calculation.html">Pump Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="casing_calculation.html">Casing Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecost/cost_stage_calculator.html">Cost Stage Calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/cost_utils.html">Cost Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/calc_utils.html">Calc Utils</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../wellbore_data_store.html" title="previous chapter">Wellbore Data Store</a></li>
+      <li>Next: <a href="../wellborecost/wellborecost_pipeline.html" title="next chapter">Wellbore Cost Pipeline</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Doran Huh, Dr. Graeme Beardsmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.0.2</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/wellborecalc/wellborecalc_pipeline.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

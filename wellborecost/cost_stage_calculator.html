@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cost Stage Calculator &#8212; geodrillcalc 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=c058f7c8" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Utils" href="../utils/utils.html" />
+    <link rel="prev" title="Casing Calculation" href="../wellborecalc/casing_calculation.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="cost-stage-calculator">
+<h1>Cost Stage Calculator<a class="headerlink" href="#cost-stage-calculator" title="Link to this heading">¶</a></h1>
+<p>This section covers the cost stage calculator used in determining the financial aspects of wellbore projects.</p>
+<dl class="py class" id="module-geodrillcalc.wellborecost.cost_stage_calculator">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geodrillcalc.wellborecost.cost_stage_calculator.</span></span><span class="sig-name descname"><span class="pre">CostStageCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cost_rates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wellbore_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin_rates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_labels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Stores calculation methods required for the cost calculation pipeline.</p>
+<p>This class manages the calculations for various cost components associated with wellbore construction. 
+It uses provided cost rates and wellbore parameters to calculate drilling, time, material, and other costs. 
+Margin functions are applied to these costs to account for uncertainties and contingencies.</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>logger<span class="classifier">Logger</span></dt><dd><p>Logger instance for logging errors and information.</p>
+</dd>
+<dt>cost_rates<span class="classifier">dict</span></dt><dd><p>Dictionary containing cost rates for different stages and components.</p>
+</dd>
+<dt>wellbore_params<span class="classifier">dict</span></dt><dd><p>Dictionary containing wellbore parameters required for cost calculations.</p>
+</dd>
+<dt>margin_functions<span class="classifier">pd.DataFrame</span></dt><dd><p>DataFrame containing margin functions used for cost calculations.</p>
+</dd>
+<dt>stage_labels<span class="classifier">list</span></dt><dd><p>List of labels indicating the different stages of cost calculation.</p>
+</dd>
+<dt>stage_calculators<span class="classifier">dict</span></dt><dd><p>Dictionary mapping stage labels to their corresponding cost calculation methods.</p>
+</dd>
+</dl>
+</section>
+<section id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>drilling_rate_params() -&gt; dict</dt><dd><p>Returns parameters required for calculating drilling rates.</p>
+</dd>
+<dt>time_rate_params() -&gt; dict</dt><dd><p>Returns parameters required for calculating time rates.</p>
+</dd>
+<dt>material_params() -&gt; dict</dt><dd><p>Returns parameters required for calculating material costs.</p>
+</dd>
+<dt>other_params() -&gt; dict</dt><dd><p>Returns parameters required for calculating other costs.</p>
+</dd>
+<dt>drilling_cost_rates() -&gt; dict</dt><dd><p>Returns cost rates specific to drilling.</p>
+</dd>
+<dt>time_cost_rates() -&gt; dict</dt><dd><p>Returns cost rates specific to time-related expenses.</p>
+</dd>
+<dt>material_cost_rates() -&gt; dict</dt><dd><p>Returns cost rates specific to materials.</p>
+</dd>
+<dt>other_cost_rates() -&gt; dict</dt><dd><p>Returns cost rates specific to other miscellaneous costs.</p>
+</dd>
+<dt>_initialise_margin_functions(margins_dict: dict) -&gt; pd.DataFrame</dt><dd><p>Initialises margin functions based on provided margin rates.</p>
+</dd>
+<dt>calculate_drilling_components_cost() -&gt; pd.DataFrame</dt><dd><p>Calculates the costs associated with drilling components.</p>
+</dd>
+<dt>calculate_drilling_rates_total_cost(base_sum: float) -&gt; pd.Series</dt><dd><p>Calculates the total cost for drilling rates including margins.</p>
+</dd>
+<dt>calculate_time_components_cost() -&gt; pd.DataFrame</dt><dd><p>Calculates the costs associated with time-based components.</p>
+</dd>
+<dt>calculate_material_components_cost() -&gt; pd.DataFrame</dt><dd><p>Calculates the costs associated with material components.</p>
+</dd>
+<dt>calculate_other_components_cost() -&gt; pd.DataFrame</dt><dd><p>Calculates the costs associated with other miscellaneous components.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.calculate_drilling_components_cost">
+<span class="sig-name descname"><span class="pre">calculate_drilling_components_cost</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.calculate_drilling_components_cost" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the costs associated with drilling components.</p>
+<p>This method computes the drilling costs based on total well depth, section lengths, and diameters. 
+It includes costs for pilot holes and casing stages, incorporating different diameter rates and offsets.</p>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>A DataFrame containing the base, low, and high cost estimates for each drilling component.</p>
+</dd>
+</dl>
+</section>
+<section id="raises">
+<h3>Raises<a class="headerlink" href="#raises" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>KeyError</dt><dd><p>If any required parameter is missing from <cite>drilling_rate_params</cite> or <cite>drilling_cost_rates</cite>.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.calculate_drilling_rates_total_cost">
+<span class="sig-name descname"><span class="pre">calculate_drilling_rates_total_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_sum</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Series</span></span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.calculate_drilling_rates_total_cost" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the total cost for drilling rates, including margins.</p>
+<p>This method computes the low, base, and high cost estimates for drilling rates based on the 
+total well depth and error margins provided in <cite>drilling_cost_rates</cite>.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>base_sum<span class="classifier">float</span></dt><dd><p>The base sum of drilling costs.</p>
+</dd>
+</dl>
+</section>
+<section id="id1">
+<h3>Returns<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>pd.Series</dt><dd><p>A Series containing the low, base, and high cost estimates for drilling rates.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.calculate_material_components_cost">
+<span class="sig-name descname"><span class="pre">calculate_material_components_cost</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.calculate_material_components_cost" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the costs associated with material components.</p>
+<p>This method computes the material costs required for wellbore construction, including cement, 
+gravel, bentonite, drilling fluids, and other materials. It also calculates the costs for different 
+bore sections and centraliser.</p>
+<section id="id2">
+<h3>Returns<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>A DataFrame containing the base, low, and high cost estimates for each material component.</p>
+</dd>
+</dl>
+</section>
+<section id="id3">
+<h3>Raises<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>KeyError</dt><dd><p>If any required parameter is missing from <cite>material_params</cite> or <cite>material_cost_rates</cite>.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.calculate_other_components_cost">
+<span class="sig-name descname"><span class="pre">calculate_other_components_cost</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.calculate_other_components_cost" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the costs associated with other miscellaneous components.</p>
+<p>This method computes the costs for various additional components such as disinfection, mobilisation, 
+grouting, logging, fabrication, cement casing, gravel packing, and subcontract welders. It uses 
+parameters like total well depth, section lengths, and drilling time for calculations.</p>
+<section id="id4">
+<h3>Returns<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>A DataFrame containing the base, low, and high cost estimates for each miscellaneous component.</p>
+</dd>
+</dl>
+</section>
+<section id="id5">
+<h3>Raises<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>KeyError</dt><dd><p>If any required parameter is missing from <cite>other_params</cite> or <cite>other_cost_rates</cite>.</p>
+</dd>
+<dt>Exception</dt><dd><p>If any other error occurs during cost calculation.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.calculate_time_components_cost">
+<span class="sig-name descname"><span class="pre">calculate_time_components_cost</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.calculate_time_components_cost" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the costs associated with time-based components.</p>
+<p>This method computes the time-related costs for wellbore construction, including rig standby, 
+development, accommodation, telehandler, and generator fuel costs. It uses the required flow rate 
+and drilling time parameters for calculations.</p>
+<section id="id6">
+<h3>Returns<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>A DataFrame containing the base, low, and high cost estimates for each time-related component.</p>
+</dd>
+</dl>
+</section>
+<section id="id7">
+<h3>Raises<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If any calculation error occurs.</p>
+</dd>
+<dt>KeyError</dt><dd><p>If any required parameter is missing from <cite>time_rate_params</cite> or <cite>time_cost_rates</cite>.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.drilling_cost_rates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">drilling_cost_rates</span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.drilling_cost_rates" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.drilling_rate_params">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">drilling_rate_params</span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.drilling_rate_params" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.material_cost_rates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">material_cost_rates</span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.material_cost_rates" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.material_params">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">material_params</span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.material_params" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.other_cost_rates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">other_cost_rates</span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.other_cost_rates" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.other_params">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">other_params</span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.other_params" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.time_cost_rates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_cost_rates</span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.time_cost_rates" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.time_rate_params">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_rate_params</span></span><a class="headerlink" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator.time_rate_params" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">geodrillcalc</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../geodrillcalc_interface.html">GeoDrillCalc Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellbore_data_store.html">Wellbore Data Store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecalc/wellborecalc_pipeline.html">Wellbore Calculation Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wellborecost_pipeline.html">Wellbore Cost Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecalc/screen_calculation.html">Screen Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecalc/pump_calculation.html">Pump Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecalc/casing_calculation.html">Casing Calculation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Cost Stage Calculator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.wellborecost.cost_stage_calculator.CostStageCalculator"><code class="docutils literal notranslate"><span class="pre">CostStageCalculator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/cost_utils.html">Cost Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/calc_utils.html">Calc Utils</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../wellborecalc/casing_calculation.html" title="previous chapter">Casing Calculation</a></li>
+      <li>Next: <a href="../utils/utils.html" title="next chapter">Utils</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Doran Huh, Dr. Graeme Beardsmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.0.2</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/wellborecost/cost_stage_calculator.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

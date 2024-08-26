@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>GeoDrillCalc Interface &#8212; geodrillcalc 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=c058f7c8" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=8d563738"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Wellbore Data Store" href="wellbore_data_store.html" />
+    <link rel="prev" title="geodrillcalc documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="geodrillcalc-interface">
+<h1>GeoDrillCalc Interface<a class="headerlink" href="#geodrillcalc-interface" title="Link to this heading">¶</a></h1>
+<p>This section documents the <cite>GeoDrillCalc</cite> interface module, which provides the main interface for wellbore parameter calculations.</p>
+<p id="module-geodrillcalc.geodrillcalc_interface">This module defines a class, GeoDrillCalcInterface, that serves as an interface
+for calculating wellbore parameters. It utilises the WellBoreDataStore class for managing
+wellbore data and the CalcPipeline class for performing wellbore calculations.</p>
+<section id="example-usage">
+<h2>Example Usage:<a class="headerlink" href="#example-usage" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">geo_interface</span> <span class="o">=</span> <span class="n">GeoDrillCalcInterface</span><span class="p">()</span>
+
+<span class="n">result_wbd</span> <span class="o">=</span> <span class="n">geo_interface</span><span class="o">.</span><span class="n">calculate_and_return_wellbore_parameters</span><span class="p">(</span>
+    <span class="n">is_production_well</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">aquifer_layer_table</span><span class="o">=</span><span class="n">aquifer_layer_table</span><span class="p">,</span>
+    <span class="n">initial_input_params</span><span class="o">=</span><span class="n">initial_values</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="note">
+<h2>Note:<a class="headerlink" href="#note" title="Link to this heading">¶</a></h2>
+<p>Ensure that you provide valid depth data and initial input data
+when using the ‘calculate_and_return_wellbore_parameters’ method.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geodrillcalc.geodrillcalc_interface.</span></span><span class="sig-name descname"><span class="pre">GeoDrillCalcInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_production_well</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'INFO'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class representing the interface for calculating wellbore parameters.</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>wbd<span class="classifier">WellBoreDataStore</span></dt><dd><p>An instance of the WellBoreDataStore class for managing wellbore data.</p>
+</dd>
+<dt>calcpl<span class="classifier">CalcPipeline</span></dt><dd><p>An instance of the CalcPipeline class for performing wellbore calculations.</p>
+</dd>
+<dt>costpl<span class="classifier">CostPipeline</span></dt><dd><p>An instance of the CostPipeline class for performing wellbore cost calculations.</p>
+</dd>
+<dt>is_production_well<span class="classifier">bool</span></dt><dd><p>A boolean indicating whether the pump used is for production or injection.</p>
+</dd>
+<dt>logger<span class="classifier">Logger</span></dt><dd><p>A logger for handling log messages in the GeoDrillCalcInterface class.</p>
+</dd>
+</dl>
+</section>
+<section id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>calculate_and_return_wellbore_parameters(is_production_well, aquifer_layer_table, initial_input_params, cost_rates=None, margin_rates=None)</dt><dd><p>Calculates wellbore parameters and returns the WellBoreDataStore instance.</p>
+</dd>
+<dt>set_loglevel(loglevel)</dt><dd><p>Sets the logging level of the current instance’s logger.</p>
+</dd>
+</dl>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">geo_interface</span> <span class="o">=</span> <span class="n">GeoDrillCalcInterface</span><span class="p">()</span>
+
+<span class="n">result_wbd</span> <span class="o">=</span> <span class="n">geo_interface</span><span class="o">.</span><span class="n">calculate_and_return_wellbore_parameters</span><span class="p">(</span>
+    <span class="n">is_production_well</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">aquifer_layer_table</span><span class="o">=</span><span class="n">aquifer_layer_table</span><span class="p">,</span>
+    <span class="n">initial_input_params</span><span class="o">=</span><span class="n">initial_values</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2>Note<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>Ensure that you provide valid depth data and initial input data
+when using the ‘calculate_and_return_wellbore_parameters’ method.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface.calculate_and_return_wellbore_parameters">
+<span class="sig-name descname"><span class="pre">calculate_and_return_wellbore_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_production_well</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aquifer_layer_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_input_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_rates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin_rates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface.calculate_and_return_wellbore_parameters" title="Link to this definition">¶</a></dt>
+<dd><p>Orchestration method for inputting and calculating the model parameters.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>is_production_well<span class="classifier">bool</span></dt><dd><p>Indicates whether the pump used is for production or injection.</p>
+</dd>
+<dt>aquifer_layer_table<span class="classifier">pandas.DataFrame</span></dt><dd><p>A pandas DataFrame containing aquifer layer data.</p>
+</dd>
+<dt>initial_input_params<span class="classifier">dict</span></dt><dd><p>A dictionary containing initial input parameters.</p>
+</dd>
+<dt>cost_rates<span class="classifier">dict, optional</span></dt><dd><p>An optional dictionary containing cost rates for wellbore construction.</p>
+</dd>
+<dt>margin_rates<span class="classifier">dict, optional</span></dt><dd><p>An optional dictionary containing margin rates for wellbore construction.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>WellBoreDataStore</dt><dd><p>An instance containing the results.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface.export_cost_results_to_dict">
+<span class="sig-name descname"><span class="pre">export_cost_results_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface.export_cost_results_to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the installation cost results from the instance’s WellBoreDataStore attribute.</p>
+<section id="id2">
+<h3>Parameters<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>to_json<span class="classifier">bool, optional</span></dt><dd><p>If True, returns the results as a JSON string. Defaults to False.</p>
+</dd>
+</dl>
+</section>
+<section id="id3">
+<h3>Returns<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>dict or str</dt><dd><p>A dictionary containing the combined results from both stages, or a JSON string if <cite>to_json</cite> is True.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface.export_installation_results_to_dict">
+<span class="sig-name descname"><span class="pre">export_installation_results_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface.export_installation_results_to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the installation specification results from the instance’s WellBoreDataStore attribute.</p>
+<section id="id4">
+<h3>Parameters<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>to_json<span class="classifier">bool, optional</span></dt><dd><p>If True, returns the results as a JSON string. Defaults to False.</p>
+</dd>
+</dl>
+</section>
+<section id="id5">
+<h3>Returns<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>dict or str</dt><dd><p>A dictionary containing the combined results from both stages, or a JSON string if <cite>to_json</cite> is True.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface.export_results_to_dict">
+<span class="sig-name descname"><span class="pre">export_results_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface.export_results_to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the calculated results from the instance’s WellBoreDataStore attribute.</p>
+<section id="id6">
+<h3>Parameters<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>to_json<span class="classifier">bool, optional</span></dt><dd><p>If True, returns the results as a JSON string. Defaults to False.</p>
+</dd>
+</dl>
+</section>
+<section id="id7">
+<h3>Returns<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>dict or str</dt><dd><p>A dictionary containing the installation specification results, or a JSON string if <cite>to_json</cite> is True.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface.set_loglevel">
+<span class="sig-name descname"><span class="pre">set_loglevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loglevel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface.set_loglevel" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the logging level of the current instance’s logger.</p>
+<section id="id8">
+<h3>Parameters<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>loglevel<span class="classifier">int or str</span></dt><dd><p>The logging level to set.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">geodrillcalc</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GeoDrillCalc Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-usage">Example Usage:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#note">Note:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.geodrillcalc_interface.GeoDrillCalcInterface"><code class="docutils literal notranslate"><span class="pre">GeoDrillCalcInterface</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="wellbore_data_store.html">Wellbore Data Store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wellborecalc/wellborecalc_pipeline.html">Wellbore Calculation Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wellborecost/wellborecost_pipeline.html">Wellbore Cost Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wellborecalc/screen_calculation.html">Screen Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wellborecalc/pump_calculation.html">Pump Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wellborecalc/casing_calculation.html">Casing Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wellborecost/cost_stage_calculator.html">Cost Stage Calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/cost_utils.html">Cost Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/calc_utils.html">Calc Utils</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">geodrillcalc documentation</a></li>
+      <li>Next: <a href="wellbore_data_store.html" title="next chapter">Wellbore Data Store</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Doran Huh, Dr. Graeme Beardsmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.0.2</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/geodrillcalc_interface.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

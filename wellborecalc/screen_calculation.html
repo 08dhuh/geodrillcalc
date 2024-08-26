@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Screen Calculation &#8212; geodrillcalc 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=c058f7c8" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Pump Calculation" href="pump_calculation.html" />
+    <link rel="prev" title="Wellbore Cost Pipeline" href="../wellborecost/wellborecost_pipeline.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="screen-calculation">
+<h1>Screen Calculation<a class="headerlink" href="#screen-calculation" title="Link to this heading">¶</a></h1>
+<p>This section details the screen calculation process within the wellbore calculation pipeline.</p>
+<dl class="py function" id="module-geodrillcalc.wellborecalc.screen_calculation">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecalc.screen_calculation.calculate_casing_friction">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.wellborecalc.screen_calculation.</span></span><span class="sig-name descname"><span class="pre">calculate_casing_friction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">depth_to_top_screen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req_flow_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">casing_diameter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipe_roughness_coeff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_casing_friction" title="Link to this definition">¶</a></dt>
+<dd><p>Estimates production casing friction loss above aquifer
+for nominal diameters (e.g. 101.6, 127, 152.4, 203.2, 254, 304.8 mm)</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>depth_to_top_screen<span class="classifier">float</span></dt><dd><p>Depth to the top of the screen in metres.</p>
+</dd>
+<dt>req_flow_rate<span class="classifier">float</span></dt><dd><p>Required flow rate in cubic metres per second (m^3/s).</p>
+</dd>
+<dt>casing_diameter<span class="classifier">float or np.ndarray</span></dt><dd><p>Diameter of the casing in metres.</p>
+</dd>
+<dt>pipe_roughness_coeff<span class="classifier">float, optional</span></dt><dd><p>Pipe roughness coefficient, default is 100 for steel.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h2>Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>float</dt><dd><p>The calculated friction loss in metres.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecalc.screen_calculation.calculate_minimum_open_hole_diameter">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.wellborecalc.screen_calculation.</span></span><span class="sig-name descname"><span class="pre">calculate_minimum_open_hole_diameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req_flow_rate_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sand_face_velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reservoir_porosity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngr_aquifer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_minimum_open_hole_diameter" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the minimum open hole diameter (OHD) required to meet the specified flow rate.</p>
+<section id="id1">
+<h2>Parameters<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>req_flow_rate_sec<span class="classifier">float</span></dt><dd><p>Required flow rate in cubic metres per second (m^3/s).</p>
+</dd>
+<dt>screen_length<span class="classifier">float</span></dt><dd><p>Length of the screen in metres.</p>
+</dd>
+<dt>sand_face_velocity<span class="classifier">float</span></dt><dd><p>Sand face velocity in metres per second (m/s).</p>
+</dd>
+<dt>reservoir_porosity<span class="classifier">float</span></dt><dd><p>Average reservoir porosity (0 to 1).</p>
+</dd>
+<dt>ngr_aquifer<span class="classifier">float, optional</span></dt><dd><p>Net-to-gross ratio for the aquifer, default is 1.</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h2>Returns<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>float</dt><dd><p>Minimum open hole diameter in metres.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecalc.screen_calculation.calculate_minimum_screen_diameter">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.wellborecalc.screen_calculation.</span></span><span class="sig-name descname"><span class="pre">calculate_minimum_screen_diameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">up_hole_frictions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req_flow_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipe_roughness_coeff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_minimum_screen_diameter" title="Link to this definition">¶</a></dt>
+<dd><p>Determines the minimum screen diameter, SDmin (m), using the Hazen-Williams equation to ensure up-hole friction is less than 20 m.
+Reference: <a class="reference external" href="https://en.wikipedia.org/wiki/Hazen%E2%80%93Williams_equation#SI_units">https://en.wikipedia.org/wiki/Hazen%E2%80%93Williams_equation#SI_units</a></p>
+<section id="id3">
+<h2>Parameters<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>up_hole_frictions<span class="classifier">np.ndarray</span></dt><dd><p>Array of up-hole friction losses in metres. Values must be less than 20; otherwise, np.nan is returned.</p>
+</dd>
+<dt>screen_length<span class="classifier">float</span></dt><dd><p>Length of the screen in metres.</p>
+</dd>
+<dt>req_flow_rate<span class="classifier">float</span></dt><dd><p>Required flow rate in cubic metres per second (m^3/s).</p>
+</dd>
+<dt>pipe_roughness_coeff<span class="classifier">float, optional</span></dt><dd><p>Pipe roughness coefficient, default is 100.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h2>Returns<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>np.ndarray</dt><dd><p>Array of minimum screen diameters in metres. Returns np.nan for friction values that are too high.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecalc.screen_calculation.calculate_minimum_screen_length">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.wellborecalc.screen_calculation.</span></span><span class="sig-name descname"><span class="pre">calculate_minimum_screen_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req_flow_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyd_conductivity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bore_lifetime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aquifer_thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_production_well</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowable_drawdown</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bore_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0762</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specific_storage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0002</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_minimum_screen_length" title="Link to this definition">¶</a></dt>
+<dd><p>Determines the minimum screen length, SL (m)
+based on Eq 4 at <a class="reference external" href="http://quebec.hwr.arizona.edu/classes/hwr431/2006/Lab6.pdf">http://quebec.hwr.arizona.edu/classes/hwr431/2006/Lab6.pdf</a>
+If it is an injection bore, screen length is multiplied by 2.0 
+and capped at total aquifer thickness.</p>
+<section id="id5">
+<h2>Parameters<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>req_flow_rate<span class="classifier">float</span></dt><dd><p>Required flow rate in cubic metres per day (m3/day).</p>
+</dd>
+<dt>hyd_conductivity<span class="classifier">float</span></dt><dd><p>Hydraulic conductivity of the aquifer in metres per day (m/day).</p>
+</dd>
+<dt>bore_lifetime<span class="classifier">float</span></dt><dd><p>Projected lifetime of the bore in days.</p>
+</dd>
+<dt>aquifer_thickness<span class="classifier">float</span></dt><dd><p>Thickness of the aquifer in metres.</p>
+</dd>
+<dt>is_production_well<span class="classifier">bool</span></dt><dd><p>Indicates if the well is a production well (True) or an injection well (False).</p>
+</dd>
+<dt>allowable_drawdown<span class="classifier">float, optional</span></dt><dd><p>Allowable drawdown in metres, default is 25 m.</p>
+</dd>
+<dt>bore_radius<span class="classifier">float, optional</span></dt><dd><p>Radius of the bore in metres, default is 0.0762 m (3 inches).</p>
+</dd>
+<dt>specific_storage<span class="classifier">float, optional</span></dt><dd><p>Specific storage of the aquifer in inverse metres (m-1), default is 2x10-4 m-1.</p>
+</dd>
+</dl>
+</section>
+<section id="id6">
+<h2>Returns<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>tuple</dt><dd><p>A tuple containing the minimum screen length (float) and a tuple of error bounds (lower, upper).</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecalc.screen_calculation.calculate_open_hole_diameter">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.wellborecalc.screen_calculation.</span></span><span class="sig-name descname"><span class="pre">calculate_open_hole_diameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ohd_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drilling_diameters_in_metres</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_open_hole_diameter" title="Link to this definition">¶</a></dt>
+<dd><p>Determines the open hole diameter based on the minimum required diameter and available standard bit sizes.</p>
+<section id="id7">
+<h2>Parameters<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>ohd_min<span class="classifier">float</span></dt><dd><p>Minimum open hole diameter in metres.</p>
+</dd>
+<dt>drilling_diameters_in_metres<span class="classifier">list or np.ndarray</span></dt><dd><p>List or array of standard drilling diameters in metres.</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h2>Returns<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>float</dt><dd><p>The open hole diameter in metres, which is the next largest standard bit size greater than the minimum required diameter.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecalc.screen_calculation.calculate_total_casing">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.wellborecalc.screen_calculation.</span></span><span class="sig-name descname"><span class="pre">calculate_total_casing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prod_casing_diameter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_casing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_total_casing" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the total casing length required, including production casing and screen, based on given parameters.</p>
+<section id="id9">
+<h2>Parameters<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>prod_casing_diameter<span class="classifier">float</span></dt><dd><p>Diameter of the production casing in metres.</p>
+</dd>
+<dt>screen_diameter<span class="classifier">float</span></dt><dd><p>Diameter of the screen in metres. If invalid or larger than the production casing diameter, np.nan is returned.</p>
+</dd>
+<dt>intermediate_casing<span class="classifier">float</span></dt><dd><p>Length of intermediate casing in metres, typically measured from LMTA minus 10 metres.</p>
+</dd>
+<dt>screen_length<span class="classifier">float</span></dt><dd><p>Length of the screen in metres.</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h2>Returns<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>float</dt><dd><p>Total length of casing required in metres. 
+Returns np.nan if screen diameter is invalid or too large.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecalc.screen_calculation.calibrate_open_hole_diameter">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.wellborecalc.screen_calculation.</span></span><span class="sig-name descname"><span class="pre">calibrate_open_hole_diameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ohd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_diameter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">casing_diameter_table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.wellborecalc.screen_calculation.calibrate_open_hole_diameter" title="Link to this definition">¶</a></dt>
+<dd><p>Calibrates the open hole diameter to ensure it is suitable for the given screen diameter.</p>
+<section id="id11">
+<h2>Parameters<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>ohd<span class="classifier">float</span></dt><dd><p>Current open hole diameter in metres.</p>
+</dd>
+<dt>screen_diameter<span class="classifier">float</span></dt><dd><p>Diameter of the screen in metres.</p>
+</dd>
+<dt>casing_diameter_table<span class="classifier">DataFrame</span></dt><dd><p>DataFrame containing standard casing diameters and related data.</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h2>Returns<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>float</dt><dd><p>Calibrated open hole diameter in metres.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodrillcalc.wellborecalc.screen_calculation.is_water_corrosive">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.wellborecalc.screen_calculation.</span></span><span class="sig-name descname"><span class="pre">is_water_corrosive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pH</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calcium_ion_concentration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carbonate_ion_concentration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_dissolved_solids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#geodrillcalc.wellborecalc.screen_calculation.is_water_corrosive" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the Langelier Saturation Index (LSI) of geothermal water.</p>
+<p>The LSI is used to evaluate the corrosive potential of water based on its chemistry.</p>
+<section id="id13">
+<h2>Parameters<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>temperature_k<span class="classifier">float</span></dt><dd><p>Temperature of the water in Kelvin, must be in the range of 273 &lt;= T &lt;= 363.</p>
+</dd>
+<dt>pH<span class="classifier">float</span></dt><dd><p>pH level of the water.</p>
+</dd>
+<dt>calcium_ion_concentration<span class="classifier">float</span></dt><dd><p>Calcium ion concentration in ppm.</p>
+</dd>
+<dt>carbonate_ion_concentration<span class="classifier">float</span></dt><dd><p>Carbonate ion concentration in ppm.</p>
+</dd>
+<dt>total_dissolved_solids<span class="classifier">float</span></dt><dd><p>Total dissolved solids (TDS) in ppm.</p>
+</dd>
+</dl>
+</section>
+<section id="id14">
+<h2>Returns<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>float</dt><dd><p>Langelier Saturation Index (LSI), which indicates the water’s tendency to precipitate or dissolve calcium carbonate.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">geodrillcalc</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../geodrillcalc_interface.html">GeoDrillCalc Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellbore_data_store.html">Wellbore Data Store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wellborecalc_pipeline.html">Wellbore Calculation Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecost/wellborecost_pipeline.html">Wellbore Cost Pipeline</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Screen Calculation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_casing_friction"><code class="docutils literal notranslate"><span class="pre">calculate_casing_friction()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_minimum_open_hole_diameter"><code class="docutils literal notranslate"><span class="pre">calculate_minimum_open_hole_diameter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_minimum_screen_diameter"><code class="docutils literal notranslate"><span class="pre">calculate_minimum_screen_diameter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_minimum_screen_length"><code class="docutils literal notranslate"><span class="pre">calculate_minimum_screen_length()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_open_hole_diameter"><code class="docutils literal notranslate"><span class="pre">calculate_open_hole_diameter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.wellborecalc.screen_calculation.calculate_total_casing"><code class="docutils literal notranslate"><span class="pre">calculate_total_casing()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.wellborecalc.screen_calculation.calibrate_open_hole_diameter"><code class="docutils literal notranslate"><span class="pre">calibrate_open_hole_diameter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.wellborecalc.screen_calculation.is_water_corrosive"><code class="docutils literal notranslate"><span class="pre">is_water_corrosive()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pump_calculation.html">Pump Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="casing_calculation.html">Casing Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecost/cost_stage_calculator.html">Cost Stage Calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/cost_utils.html">Cost Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/calc_utils.html">Calc Utils</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../wellborecost/wellborecost_pipeline.html" title="previous chapter">Wellbore Cost Pipeline</a></li>
+      <li>Next: <a href="pump_calculation.html" title="next chapter">Pump Calculation</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Doran Huh, Dr. Graeme Beardsmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.0.2</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/wellborecalc/screen_calculation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

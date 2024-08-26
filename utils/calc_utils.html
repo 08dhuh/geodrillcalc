@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Calc Utils &#8212; geodrillcalc 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=c058f7c8" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Cost Utils" href="cost_utils.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="calc-utils">
+<h1>Calc Utils<a class="headerlink" href="#calc-utils" title="Link to this heading">¶</a></h1>
+<p>This section explains the utility functions used for installation specification calculations in the project.</p>
+<dl class="py function" id="module-geodrillcalc.utils.calc_utils">
+<dt class="sig sig-object py" id="geodrillcalc.utils.calc_utils.find_nearest_value">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.utils.calc_utils.</span></span><span class="sig-name descname"><span class="pre">find_nearest_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">larger_than_or_equal_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_size_larger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.utils.calc_utils.find_nearest_value" title="Link to this definition">¶</a></dt>
+<dd><p>Finds and returns the nearest value in an array relative to the given value.</p>
+<p>This function can also find the nearest value that is one nominal casing size larger than the given value, if specified.</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>val<span class="classifier">float</span></dt><dd><p>The target value for which the nearest value is to be found.</p>
+</dd>
+<dt>array<span class="classifier">list or numpy.ndarray</span></dt><dd><p>The array of values to search for the nearest value.</p>
+</dd>
+<dt>larger_than_or_equal_val<span class="classifier">bool, optional</span></dt><dd><p>If True, search for values larger than or equal to ‘val’. If False, search for values strictly larger than ‘val’. Default is True.</p>
+</dd>
+<dt>one_size_larger<span class="classifier">bool, optional</span></dt><dd><p>If True, find the nearest value that is one nominal casing size larger than ‘val’. This option is applicable only when ‘larger_than_or_equal_val’ is True. Default is False.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h2>Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>float</dt><dd><p>The nearest value in the ‘array’ relative to ‘val’. If ‘one_size_larger’ is True and a larger or equal value is not found, returns the next nominal casing size larger.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodrillcalc.utils.calc_utils.find_next_largest_value">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.utils.calc_utils.</span></span><span class="sig-name descname"><span class="pre">find_next_largest_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.utils.calc_utils.find_next_largest_value" title="Link to this definition">¶</a></dt>
+<dd><p>Finds the next nominal casing size larger than the given value in the array.</p>
+<section id="id1">
+<h2>Parameters<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>val<span class="classifier">float</span></dt><dd><p>The target value for which the next nominal casing size larger is to be found.</p>
+</dd>
+<dt>array<span class="classifier">list or numpy.ndarray</span></dt><dd><p>The array of values in which to search for the next larger value.</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h2>Returns<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>float</dt><dd><p>The next nominal casing size larger than ‘val’ in the ‘array’.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodrillcalc.utils.calc_utils.query_diameter_table">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.utils.calc_utils.</span></span><span class="sig-name descname"><span class="pre">query_diameter_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'metres'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_param_column_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.utils.calc_utils.query_diameter_table" title="Link to this definition">¶</a></dt>
+<dd><p>Queries a diameter table to find a recommended bit size based on the given value.</p>
+<section id="id3">
+<h2>Parameters<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>val<span class="classifier">float</span></dt><dd><p>The value to search for in the ‘metric_column’ of the table.</p>
+</dd>
+<dt>table<span class="classifier">pandas.DataFrame</span></dt><dd><p>A DataFrame containing drilling or casing diameter data.</p>
+</dd>
+<dt>metric_column<span class="classifier">str, optional</span></dt><dd><p>The column name to query for ‘val’. Default is ‘metres’.</p>
+</dd>
+<dt>query_param_column_id<span class="classifier">int, optional</span></dt><dd><p>The column index from which to retrieve the recommended bit size. Default is 2.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h2>Returns<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>float</dt><dd><p>The recommended bit size corresponding to the provided ‘val’.</p>
+</dd>
+</dl>
+</section>
+<section id="raises">
+<h2>Raises<a class="headerlink" href="#raises" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If no matching value is found in the ‘metric_column’.</p>
+</dd>
+<dt>KeyError</dt><dd><p>If the specified ‘metric_column’ does not exist in the table.</p>
+</dd>
+<dt>IndexError</dt><dd><p>If the ‘query_param_column_id’ is out of the DataFrame’s column index range.</p>
+</dd>
+<dt>RuntimeError</dt><dd><p>If an unexpected error occurs during the query.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodrillcalc.utils.calc_utils.validate">
+<span class="sig-prename descclassname"><span class="pre">geodrillcalc.utils.calc_utils.</span></span><span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geodrillcalc.utils.calc_utils.validate" title="Link to this definition">¶</a></dt>
+<dd><p>Validates a given value based on a condition.</p>
+<section id="id5">
+<h2>Parameters<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>value<span class="classifier">Any</span></dt><dd><p>The value to be validated.</p>
+</dd>
+<dt>condition<span class="classifier">callable, optional</span></dt><dd><p>A function or lambda that takes a single argument and returns True or False.</p>
+</dd>
+</dl>
+</section>
+<section id="id6">
+<h2>Returns<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>bool</dt><dd><p>True if the value meets the condition or if no condition is provided; False otherwise.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">geodrillcalc</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../geodrillcalc_interface.html">GeoDrillCalc Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellbore_data_store.html">Wellbore Data Store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecalc/wellborecalc_pipeline.html">Wellbore Calculation Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecost/wellborecost_pipeline.html">Wellbore Cost Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecalc/screen_calculation.html">Screen Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecalc/pump_calculation.html">Pump Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecalc/casing_calculation.html">Casing Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wellborecost/cost_stage_calculator.html">Cost Stage Calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cost_utils.html">Cost Utils</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Calc Utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.utils.calc_utils.find_nearest_value"><code class="docutils literal notranslate"><span class="pre">find_nearest_value()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.utils.calc_utils.find_next_largest_value"><code class="docutils literal notranslate"><span class="pre">find_next_largest_value()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.utils.calc_utils.query_diameter_table"><code class="docutils literal notranslate"><span class="pre">query_diameter_table()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geodrillcalc.utils.calc_utils.validate"><code class="docutils literal notranslate"><span class="pre">validate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="cost_utils.html" title="previous chapter">Cost Utils</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Doran Huh, Dr. Graeme Beardsmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.0.2</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/utils/calc_utils.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
