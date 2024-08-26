@@ -7,15 +7,21 @@ logger=None
 
 def getlogger(log_level='INFO') -> logging.Logger:
     """
-    Get the pre-configured logger instance.
+    Gets a pre-configured logger instance.
 
-    Parameters:
-    - log_level: str (default: 'INFO')
-        The logging level as a string. Possible values: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'.
-    
-    Returns:
-    - logger: logging.Logger
+    Parameters
+    ----------
+    log_level : str, optional
+        The logging level as a string, default is 'INFO'. Possible values include 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'.
+
+    Returns
+    -------
+    logger : logging.Logger
         The configured logger instance.
+
+    Notes
+    -----
+    The logger instance is globally defined and will be re-used across multiple calls to avoid re-configuration.
     """
     global logger
     if logger is None:
@@ -25,22 +31,35 @@ def getlogger(log_level='INFO') -> logging.Logger:
             level=numeric_level, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S %d-%m-%Y")
     return logger
 
-# def save_df_to_dict(obj, 
-#                     keys,
-#                     to_json:bool=True):
-#     results = {}
-#     for key in keys:
-#         value = getattr(obj, key)
-#         if isinstance(value, pd.DataFrame):
-#             # json compatible
-#             value = value.replace(np.nan, None)
-#             if to_json:
-#                 results[key] = value.to_json()
-#                 continue
-#         results[key] = value
-#     return results
 
 def serialize_results(obj, keys, to_json: bool = True):
+    """
+    Serialises the specified attributes of an object.
+
+    This function serialises specified attributes of an object, converting them to either a JSON string or 
+    a Python dictionary. It handles both single-indexed and MultiIndex pandas DataFrames, converting them 
+    appropriately.
+
+    Parameters
+    ----------
+    obj : object
+        The object from which attributes will be serialized.
+    keys : list
+        A list of attribute names to be serialized.
+    to_json : bool, optional
+        If True, the function converts DataFrames to JSON strings. If False, it returns dictionaries, 
+        by default True.
+
+    Returns
+    -------
+    results : dict
+        A dictionary containing the serialized attributes.
+
+    Notes
+    -----
+    - The function replaces NaN values with None to ensure JSON compatibility.
+    - MultiIndex DataFrames are flattened and converted into a list of dictionaries.
+    """
     results = {}
     for key in keys:
         value = getattr(obj, key)
@@ -68,11 +87,20 @@ def serialize_results(obj, keys, to_json: bool = True):
 def get_all_non_boilerplate_attributes(cls):
     """Returns a list of all non-boilerplate attributes of the class.
 
-    Returns:
-        A list of strings, where each string is the name of a non-boilerplate
-        attribute.
-    """
+    Parameters
+    ----------
+    cls : class
+        The class from which attributes are to be extracted.
 
+    Returns
+    -------
+    list
+        A list of strings, where each string is the name of a non-boilerplate attribute.
+
+    Notes
+    -----
+    - The function excludes attributes starting with an underscore and certain standard attributes like '__class__' and '__module__'.
+    """
     boilerplate_attribute_names = ["__class__", "__dict__", "__module__"]
     attribute_names = [attr for attr in dir(cls) if not attr.startswith(
         "_") and attr not in boilerplate_attribute_names]

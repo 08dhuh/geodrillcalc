@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 def test_pipeline():
-    import geodrillcalc.geodrillcalc as gdc
+    import geodrillcalc.geodrillcalc_interface as gdc
     from geodrillcalc.wellborecost.cost_parameter_extractor import CostParameterExtractor
     from geodrillcalc.wellborecost.wellborecost_pipeline import CostPipeline
     from geodrillcalc.wellborecost.cost_stage_calculator import CostStageCalculator

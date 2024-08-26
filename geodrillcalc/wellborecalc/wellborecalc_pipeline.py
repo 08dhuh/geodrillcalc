@@ -4,7 +4,7 @@ import pandas as pd
 
 from geodrillcalc.utils.calc_utils import find_next_largest_value, query_diameter_table
 from ..wellbore_data_store import WellBoreDataStore
-from . import stage1_calc_screen as ci, stage2_calc_pump as cp, stage3_calc_casing as cc
+from . import casing_calculation as cc, pump_calculation as cp, screen_calculation as ci
 from ..utils.utils import getlogger 
 
 
@@ -25,72 +25,47 @@ class CalcPipeline:
     For the casing stage, an additional argument is required, 
     distinguishing between production and injection pumps 
 
-    Method Overview:
+    Method Overview
+    ---------------
     1. _screen_pipeline: Calculates interval parameters.
     2. _pump_pipeline: Calculates pump parameters.
-    3. _casing_pipeline: Calculates casing parameters. 
-        Requires a boolean argument (True for production pump, False for injection pump).
-    4. calc_pipeline: Encapsulates the pipeline methods in a single method
+    3. _casing_pipeline: Calculates casing parameters. Requires a boolean argument (True for production pump, False for injection pump).
+    4. calc_pipeline: Encapsulates the pipeline methods in a single method.
 
-    Required Parameters:
-        aquifer_layer_table = {
-            "aquifer_layer": [
-                '100qa',
-                '103utqd',
-                '105utaf',
-                '106utd',
-                '107umta',
-                '108umtd',
-                '109lmta',
-                '111lta',
-                '114bse'
-            ],
-            "is_aquifer": [
-                True,
-                False,
-                True,
-                False,
-                True,
-                False,
-                True,
-                True,
-                False
-            ],
-            "depth_to_base": [
-                3,
-                53,
-                112,
-                150,
-                150,
-                1000,
-                1000,
-                1221,
-                1421
-            ]
-        }
-
-        initial_values = {
-            "required_flow_rate": 4320,
-            "hydraulic_conductivity": 5,
-            "average_porosity": 0.25,
-            "bore_lifetime_year": 30,
-            "groundwater_depth": 25,
-            "long_term_decline_rate": 1,
-            "allowable_drawdown": 25,
-            "safety_margin": 25,
-            "target_aquifer_layer": "109lmta",
-            "top_aquifer_layer": "100qa"
-        }
-
-    Usage Example:
-    wbd = WellBoreDataStore()
-    wbd.initialise_and_validate_input_params(aquifer_layer_table=aquifer_layer_table, **initial_values)  
+    Parameters
+    ----------
+    aquifer_layer_table : dict
+        A dictionary containing details about aquifer layers.
     
-    calc_injectionpipe = CalcPipeline(wbd)
-    calc_injectionpipe.calc_pipeline(is_production_well=True)
+    initial_values : dict
+        A dictionary containing initial values for wellbore calculations.
+
+    Example
+    -------
+    .. code-block:: python
+
+        wbd = WellBoreDataStore()
+        wbd.initialise_and_validate_input_params(aquifer_layer_table=aquifer_layer_table, **initial_values)
+        calc_injectionpipe = CalcPipeline(wbd)
+        calc_injectionpipe.calc_pipeline(is_production_well=True)
     """
 
     def __init__(self, wellboredict: WellBoreDataStore, logger=None):
+        """
+        Initialises the CalcPipeline class with a WellBoreDataStore instance.
+
+        Parameters
+        ----------
+        wellboredict : WellBoreDataStore
+            An initialised instance of the WellBoreDataStore class, ready for calculations.
+        logger : Logger, optional
+            A logger instance to handle logging within the pipeline. Defaults to None.
+        
+        Raises
+        ------
+        RuntimeError
+            If the WellBoreDataStore instance is not ready for calculation.
+        """
         self.wbd = wellboredict  # wellboredict must be a fully initialised instance
         if not self.wbd.ready_for_calculation:
             raise RuntimeError(f"Input parameters must be assigned to WellBoreDataStore object before calling the current class {self.__name__}")
@@ -99,13 +74,25 @@ class CalcPipeline:
         self.logger = logger or getlogger()
 
     def calc_pipeline(self):
+        """
+        Executes the complete calculation pipeline for wellbore data.
+
+        This method sequentially calls the _screen_pipeline, _pump_pipeline, and _casing_pipeline
+        methods to perform all necessary calculations on the WellBoreDataStore instance.
+
+        Raises
+        ------
+        ValueError
+            If an error occurs during any calculation stage.
+        ZeroDivisionError
+            If a zero division error occurs during interval calculations.
+        """
         logger = self.logger
         try:
             self.wbd.ready_for_installation_output = False         
             self._screen_pipeline()
             self._pump_pipeline()
             self._casing_pipeline()
-            #setattr(self.wbd,'calculation_completed',True)
             self.wbd.ready_for_installation_output = True
         except ValueError as e:
             logger.error(f"An error occurred during calculation: {str(e)}")
@@ -116,16 +103,29 @@ class CalcPipeline:
         
     def _screen_pipeline(self):
         """
-        Determines and updates WellboreDict instance Interval parameters
-        "screen_length": float,
-        "screen_length_error": float,
-        "screen_diameter": float,
-        "open_hole_diameter": float,
+        Calculates and the following screen parameters in the WellBoreDataStore instance.
 
-        if is_production_well:
-        "min_total_casing_production_screen_diameter": float,
-        "screen_stage_table": pd.DataFrame,
+        Attributes
+        ----------
+        screen_length : float
+            The calculated screen length for the wellbore.
+        screen_length_error : float
+            The error margin in the calculated screen length.
+        screen_diameter : float
+            The diameter of the screen used in the wellbore.
+        open_hole_diameter : float
+            The diameter of the open hole in the wellbore.
+        min_total_casing_production_screen_diameter : float, optional
+            The minimum total casing production screen diameter, calculated for production wells.
+        screen_stage_table : pd.DataFrame, optional
+            A DataFrame containing the screen stage details, calculated for production wells.
+
+        Notes
+        -----
+        For production wells, additional parameters such as `min_total_casing_production_screen_diameter`
+        and `screen_stage_table` are also calculated.
         """
+
         wbd = self.wbd  # fully initialised wellboredict instance
         ir = {}
         drilling_diameter_list = wbd.get_drilling_diameters()
@@ -195,14 +195,27 @@ class CalcPipeline:
         ir['screen_diameter'] = screen_diameter
         ir['open_hole_diameter'] = ohd
         wbd.assign_parameters('installation', **ir)
-        # for key, value in ir.items():
-        #     print(f"{key}: {value}")
+
         
 
     def _pump_pipeline(self):
-        # pump_results
+        """
+        Calculates and updates pump parameters in the WellBoreDataStore instance.
+
+        Attributes
+        ----------
+        pump_inlet_depth : float
+            The depth at which the pump inlet is positioned within the wellbore.
+        minimum_pump_housing_diameter : float
+            The minimum diameter required for the pump housing.
+
+        Notes
+        -----
+        This method updates the WellBoreDataStore instance with the calculated pump parameters.
+        """
+
         wbd = self.wbd
-        pr = {}  # param_name: None for param_name in wbd.pump_param_names}
+        pr = {}  
         pr['pump_inlet_depth'] = cp.calculate_pump_inlet_depth(wbd.groundwater_depth,
                                                                wbd.allowable_drawdown,
                                                                wbd.safety_margin,
@@ -215,24 +228,42 @@ class CalcPipeline:
                                                        pump_diameter
                                                        )
         wbd.assign_parameters('installation', **pr)
-        # for key, value in pr.items():
-        #     print(f"{key}: {value}")
+
 
     def _casing_pipeline(self):
         """
-        casing_stages = ["pre_collar",
-                         "superficial_casing",
-                         "pump_chamber_casing",
-                         "intermediate_casing",
-                         "screen_riser",
-                         "screen"]
+        Calculates and updates casing parameters in the WellBoreDataStore instance.
+
+        Attributes
+        ----------
+        casing_stage_table : pd.DataFrame
+            A DataFrame that holds the calculated casing parameters for different wellbore stages.
+
+        Casing Sections
+        -----------------
+        pre_collar :
+            Contains parameters for the pre-collar section, which stabilises the top portion of the wellbore.
+        superficial_casing :
+            Contains parameters for the superficial casing section, providing surface protection.
+        pump_chamber_casing : dict
+            Contains parameters for the pump chamber casing section, where the pump will be installed.
+        intermediate_casing : dict
+            Contains parameters for the intermediate casing section, stabilising the wellbore between surface and target depths.
+        screen_riser : dict
+            Contains parameters for the screen riser section, connecting the pump chamber to the screen.
+        screen : dict
+            Contains parameters for the screen section, where the wellbore interacts with the aquifer.
+
+        Notes
+        -----
+        This method computes and updates various casing parameters necessary for wellbore construction
+        based on the WellBoreDataStore instance.
         """
         wbd = self.wbd
         logger = self.logger
         casing_stage_table = wbd.casing_stage_table.copy().drop(
             ['drill_bit'], axis=1) #drill_bit column will be added in the last part
         is_production_well = wbd.is_production_well
-        # print(casing_stage_table)
 
         screen_diameter = wbd.screen_diameter
         screen_length = wbd.screen_length

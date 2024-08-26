@@ -19,10 +19,11 @@ class WellBoreDataStore:
         Names of data parameters required for the wellbore calculations.
 
     initial_param_names : list
-        Names of initial parameters required for wellbore initialization.
+        Names of initial parameters required for wellbore initialisation.
 
     outcome_params : list
         Names of outcome parameters resulting from wellbore calculations.
+    
     Refer to example usage for details
 
     Methods:
@@ -30,8 +31,8 @@ class WellBoreDataStore:
     __init__(self, is_production_well:bool, logger=None):
         Instantiates and initialises the WellBoreDataStore instance with pre-defined values.
 
-    initialise_and_validate_input_params(self, **kwargs):
-        Initializes and validates the input data for wellbore calculations.
+    initialise_and_validate_input_params(self, \*\*kwargs):
+        Initialises and validates the input data for wellbore calculations.
 
     export_results_to_dict(self, to_json=False):
         Exports the results of the wellbore calculations to a dictionary.
@@ -106,16 +107,24 @@ class WellBoreDataStore:
     # _setup_installation_calc_attributes must be updated
 
     def __init__(self, is_production_well: bool, logger=None):
+        """
+        Initialises the WellBoreDataStore with attributes for managing wellbore parameters.
+
+        Parameters
+        ----------
+        is_production_well : bool
+            Specifies whether the well is a production well.
+        logger : Logger, optional
+            A logger instance for handling log messages. Defaults to None.
+        """
         self.is_production_well = is_production_well
         # metadata
         self._setup_installation_calc_attributes(is_production_well)
-
         self._assign_default_attributes()
 
         # control flow:
         self.ready_for_calculation = False
         self.ready_for_installation_output = False
-        # added cost related output
         self.ready_for_cost_output = False
         # ----------------------------------------------------------------
         self.logger = logger or getlogger()
@@ -154,10 +163,17 @@ class WellBoreDataStore:
     def export_installation_results_to_dict(self,
                                             to_json=False):
         """
-        Export the results of the pipeline as a Python dict object
+        Exports the results of the installation calculations as a dictionary.
 
-        Parameters:
-            to_json: if set to True, stores the pd.DataFrame item as a json string
+        Parameters
+        ----------
+        to_json : bool, optional
+            If True, stores the pandas DataFrame items as JSON strings. Defaults to False.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the results of the installation calculations.
         """
         if not self.ready_for_installation_output:
             self.logger.critical('Unfinished parameter calculation pipelines')
@@ -167,20 +183,20 @@ class WellBoreDataStore:
                                     to_json=to_json)
         return results
 
-    # def export_installation_results_to_json_string(self):
-    #     """
-    #     Export the results of the pipeline to a json format string
-    #     """
-    #     results = self.export_installation_results_to_dict(to_json=True)
-
-    #     return json.dumps(results)
 
     def export_cost_results_to_dict(self, to_json=False):
         """
-        Export the results of the cost estimation pipeline as a Python dict object.
+        Exports the results of the cost estimation calculations as a dictionary.
 
-        Parameters:
-            to_json: if set to True, stores the pd.DataFrame items as JSON strings.
+        Parameters
+        ----------
+        to_json : bool, optional
+            If True, stores the pandas DataFrame items as JSON strings. Defaults to False.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the results of the cost estimation calculations.
         """
         if not self.ready_for_cost_output:
             self.logger.critical(
@@ -193,14 +209,18 @@ class WellBoreDataStore:
 
     def export_results_to_dict(self, to_json=False):
         """
-        Export the combined results of both the installation and cost estimation pipelines
-        as a Python dict object.
+        Exports the combined results of both installation and cost estimation calculations as a dictionary.
 
-        Parameters:
-            to_json: if set to True, stores the pd.DataFrame items as JSON strings.
+        Parameters
+        ----------
+        to_json : bool, optional
+            If True, stores the pandas DataFrame items as JSON strings. Defaults to False.
 
-        Returns:
-            A dictionary containing the combined results from both stages, or a JSON string if to_json is True.
+        Returns
+        -------
+        dict
+            A dictionary containing the combined results from both installation and cost estimation stages,
+            or a JSON string if to_json is True.
         """
         # Export installation and cost results
         installation_results = self.export_installation_results_to_dict(
@@ -267,9 +287,9 @@ class WellBoreDataStore:
         # ----------------------------------------------------------------
         self.casing_stage_table = self._initialise_casing_stage_table()
         # ----------------------------------------------------------------
-        self.initialise_diameter_tables()
+        self._initialise_diameter_tables()
 
-    def initialise_diameter_tables(self,
+    def _initialise_diameter_tables(self,
                                    casing_diameter_table=None,
                                    drilling_diameter_table=None,):
         self.casing_diameter_table = casing_diameter_table or pd.DataFrame({
@@ -326,12 +346,17 @@ class WellBoreDataStore:
         """
         Assigns values from kwargs to attributes based on the calculation stage.
 
-        Parameters:
-        - stage: A string or integer indicating the calculation stage ('installation', 'cost', etc., or 0, 1).
-        - kwargs: Dictionary containing the values to assign to attributes.
+        Parameters
+        ----------
+        stage : str or int
+            Indicates the calculation stage ('installation', 'cost', etc., or 0, 1).
+        \*\*kwargs : dict
+            Dictionary containing the values to assign to attributes.
 
-        Raises:
-        - ValueError: If the stage is unknown.
+        Raises
+        ------
+        ValueError
+            If the stage is unknown.
         """
         stage_mapping = {
             'installation': self.installation_output_attribute_names,
@@ -355,6 +380,21 @@ class WellBoreDataStore:
 # -----validation private methods----------------------
 
     def _validate_aquifer_layer(self, layer_name: str, context: str):
+        """
+        Validates the presence of an aquifer layer in the aquifer layer table.
+
+        Parameters
+        ----------
+        layer_name : str
+            The name of the aquifer layer to validate.
+        context : str
+            The context in which the layer is being validated, for error messaging.
+
+        Raises
+        ------
+        ValueError
+            If the aquifer layer is not found in the table.
+        """
         if layer_name not in self.aquifer_layer_table.index:
             raise ValueError(
                 f"{context}: '{layer_name}' not found in the aquifer layer table.")
@@ -408,8 +448,37 @@ class WellBoreDataStore:
         return np.array(diam) if as_numpy else diam
 
     def get_casing_diameters(self, metric='metres', as_numpy=True):
-        """Returns as numpy array """
+        """
+        Returns casing diameters based on the specified metric.
+
+        Parameters
+        ----------
+        metric : str, optional
+            The metric for the casing diameters ('metres' or 'inches'). Defaults to 'metres'.
+        as_numpy : bool, optional
+            If True, returns the diameters as a numpy array. If False, returns as a pandas Series. Defaults to True.
+
+        Returns
+        -------
+        np.ndarray or pd.Series
+            The casing diameters in the specified metric.
+        """
         return self._get_diameter_table(casing_or_drilling='casing', metric=metric, as_numpy=as_numpy)
 
     def get_drilling_diameters(self, metric='metres', as_numpy=True):
+        """
+        Returns drilling diameters based on the specified metric.
+
+        Parameters
+        ----------
+        metric : str, optional
+            The metric for the drilling diameters ('metres' or 'inches'). Defaults to 'metres'.
+        as_numpy : bool, optional
+            If True, returns the diameters as a numpy array. If False, returns as a pandas Series. Defaults to True.
+
+        Returns
+        -------
+        np.ndarray or pd.Series
+            The drilling diameters in the specified metric.
+        """
         return self._get_diameter_table(casing_or_drilling='drilling', metric=metric, as_numpy=as_numpy)

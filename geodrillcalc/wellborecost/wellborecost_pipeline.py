@@ -6,9 +6,7 @@ from .cost_stage_calculator import CostStageCalculator
 from ..utils.utils import getlogger
 from ..utils.cost_utils import get_data_path
 
-
 logger = getlogger()
-
 #TODO: upgrade validation logics for margin and cost rates
 
 class CostPipeline:
@@ -18,14 +16,60 @@ class CostPipeline:
     This pipeline performs cost calculations in four stages: 
     drilling rates, time rates, materials, and others.
     It uses cost rates and margin rates to estimate costs for each stage.
+    
+    Attributes
+    ----------
+    wbd : WellBoreDataStore
+        The WellBoreDataStore object containing wellbore parameters.
+    cost_stage_calculator : CostStageCalculator or None
+        An instance of the CostStageCalculator class for performing cost calculations.
+    cost_rates : dict
+        Dictionary containing cost rates for each stage.
+    margin_rates : dict
+        Dictionary containing margin rates for each stage.
+    stage_labels : list
+        List of stage labels used in the cost calculation ['drilling_rates', 'time_rates', 'materials', 'others'].
+    estimate_levels : list
+        List of estimate levels used in cost calculation ['low', 'base', 'high'].
+    inputs_valid : bool
+        Boolean flag indicating if the input rates are valid.
+    
+    Methods
+    -------
+    __init__(self, wbd: WellBoreDataStore, cost_rates: dict, margin_rates: dict):
+        Initialises the CostPipeline class with wellbore data, cost rates, and margin rates.
+    _validate_inputs(self) -> bool:
+        Validates the cost and margin rates inputs.
+    _validate_cost_rates(self) -> bool:
+        Validates the cost rates input.
+    _validate_margin_rates(self) -> bool:
+        Validates the margin rates input.
+    _validate_outputs(self, tables: list) -> bool:
+        Validates the output tables to ensure they are non-empty DataFrames.
+    wellbore_params(self) -> dict:
+        Extracts cost parameters from the WellBoreDataStore object.
+    _load_fallback_rates(self, filename: str, target_attribute: str):
+        Loads fallback cost rates or margin rates from a JSON file.
+    calc_pipeline(self):
+        Executes the cost calculation pipeline and saves the results to the WellBoreDataStore instance.
+    build_cost_estimation_table(self, cost_stage_calculator: CostStageCalculator) -> pd.DataFrame:
+        Builds the cost estimation table for each stage of the cost calculation.
+    build_total_cost_table(self, cost_stage_calculator: CostStageCalculator, cost_estimation_table: pd.DataFrame) -> pd.DataFrame:
+        Builds the total cost table by aggregating costs from the cost estimation table.
     """
 
     def __init__(self, wbd: WellBoreDataStore, cost_rates: dict, margin_rates: dict):
         """
-        Args:
-            wbd: WellBoreDataStore object containing wellbore parameters.
-            cost_rates: Dictionary of cost rates for each stage.
-            margin_rates: Dictionary of margin rates for each stage.
+        Initialises the CostPipeline class with wellbore data, cost rates, and margin rates.
+
+        Parameters
+        ----------
+        wbd : WellBoreDataStore
+            The WellBoreDataStore object containing wellbore parameters.
+        cost_rates : dict
+            Dictionary containing cost rates for each stage.
+        margin_rates : dict
+            Dictionary containing margin rates for each stage.
         """
         self.stage_labels = ['drilling_rates', 'time_rates', 'materials', 'others']
         self.estimate_levels = ['low', 'base', 'high']
@@ -39,6 +83,14 @@ class CostPipeline:
 
     #validations
     def _validate_inputs(self):
+        """
+        Validates the cost and margin rates inputs.
+
+        Returns
+        -------
+        bool
+            True if both cost rates and margin rates are valid, False otherwise.
+        """
         return self._validate_cost_rates() and self._validate_margin_rates()
 
     def _validate_cost_rates(self):
@@ -48,6 +100,19 @@ class CostPipeline:
         return self.margin_rates is not None and isinstance(self.margin_rates, dict)
     
     def _validate_outputs(self, tables):
+        """
+        Validates the output tables to ensure they are non-empty DataFrames.
+
+        Parameters
+        ----------
+        tables : list
+            A list of tables (DataFrames) to validate.
+
+        Returns
+        -------
+        bool
+            True if all tables are valid, False otherwise.
+        """
         return all(isinstance(table, pd.DataFrame) and not table.empty for table in tables)
 
 
@@ -56,6 +121,11 @@ class CostPipeline:
     def wellbore_params(self):
         """
         Extracts cost parameters from the WellBoreDataStore object.
+
+        Returns
+        -------
+        dict
+            A dictionary containing wellbore parameters for each stage.
         """
         if not hasattr(self, '_wellbore_params'):
             cpe = CostParameterExtractor(self.wbd)
@@ -68,9 +138,16 @@ class CostPipeline:
         """
         Loads fallback cost rates or margin rates from a JSON file.
 
-        Args:
-            filename: Name of the JSON file containing fallback rates.
-            target_attribute: Name of the attribute to update (e.g., 'cost_rates', 'margin_rates').
+        Parameters
+        ----------
+        filename : str
+            Name of the JSON file containing fallback rates.
+        target_attribute : str
+            Name of the attribute to update (e.g., 'cost_rates', 'margin_rates').
+
+        Notes
+        -----
+        If the fallback file is not found, a warning is logged.
         """
         try:
             with open(filename, 'r') as f:
@@ -83,7 +160,14 @@ class CostPipeline:
 
     def calc_pipeline(self):
         """
-        Executes the cost calculation pipeline and saves the result to WellBoreDataStore instance.
+        Executes the cost calculation pipeline and saves the results to the WellBoreDataStore instance.
+
+        This method performs validations, loads fallback rates if necessary, calculates costs for each stage, 
+        and updates the WellBoreDataStore instance with the cost outputs.
+        
+        Notes
+        -----
+        If the inputs are invalid or the fallback rates fail to load, the cost calculation pipeline does not run.
         """
         self.inputs_valid = self._validate_inputs()
         if not self.inputs_valid:
@@ -129,6 +213,26 @@ class CostPipeline:
 
     def build_cost_estimation_table(self, 
                                     cost_stage_calculator:CostStageCalculator) -> pd.DataFrame:
+        """
+        Builds the cost estimation table for each stage of the cost calculation.
+
+        Parameters
+        ----------
+        cost_stage_calculator : CostStageCalculator
+            The CostStageCalculator object used to perform stage-specific cost calculations.
+
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame containing the cost estimation for each component of each stage.
+
+        Raises
+        ------
+        KeyError
+            If there is an error accessing the cost parameters or calculation results.
+        ValueError
+            If there is an error in the data or calculations.
+        """
         try:
             cost_estimation_table = pd.DataFrame(
                 columns=self.estimate_levels,
@@ -151,6 +255,26 @@ class CostPipeline:
     def build_total_cost_table(self, 
                                cost_stage_calculator:CostStageCalculator,
                                cost_estimation_table:pd.DataFrame) -> pd.DataFrame:
+        """
+        Builds the total cost table by aggregating costs from the cost estimation table.
+
+        Parameters
+        ----------
+        cost_stage_calculator : CostStageCalculator
+            The CostStageCalculator object used to perform stage-specific cost calculations.
+        cost_estimation_table : pd.DataFrame
+            The DataFrame containing the cost estimations for each stage.
+
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame containing the total costs for each stage and the grand total.
+
+        Raises
+        ------
+        Exception
+            If there is an error in aggregating the cost data.
+        """
         try:
             total_cost_table = cost_estimation_table.groupby(level=[0]).sum()
             total_cost_table.loc['drilling_rates'] = \
