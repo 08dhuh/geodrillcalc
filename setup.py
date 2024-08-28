@@ -22,7 +22,7 @@ with open(os.path.join(current_dir, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='geodrillcalc',  
-    version='0.4.0', 
+    version='0.4.0-alpha', 
     description='Geothermal Wellbore Parameter and Cost Calculation Tool for SGIL Project',
     long_description=long_description,
     long_description_content_type='text/markdown',
