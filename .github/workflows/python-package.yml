@@ -42,7 +42,20 @@ jobs:
       run: |
         python -m build
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: build-artifacts
         path: dist/*
+    - name: Check if release exists
+      id: check_release
+      run: |
+        TAG_NAME=${GITHUB_REF##*/}
+        if gh release view $TAG_NAME; then
+          echo "Release already exists"
+          echo "release_exists=true" >> $GITHUB_ENV
+        else
+          echo "Release does not exist"
+          echo "release_exists=false" >> $GITHUB_ENV
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
