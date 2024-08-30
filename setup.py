@@ -39,4 +39,8 @@ setup(
         'Programming Language :: Python :: 3.11',  
         'Topic :: Scientific/Engineering',  
     ],
+    package_data={
+        'geodrillcalc': ['data/*.json']
+    },
+    include_package_data=True,
 )
