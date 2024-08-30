@@ -1,3 +1,4 @@
+import importlib.resources
 import pandas as pd
 import os
 
@@ -116,6 +117,12 @@ def get_data_path(filename: str) -> str:
     This function assumes that the 'data' directory is located one level above the directory
     where this script is located.
     """
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(current_dir, '..', 'data')
-    return os.path.join(data_dir, filename)
+    try:
+        data_path = importlib.resources.files('geodrillcalc.data') / filename
+        if not data_path.exists():
+            raise FileNotFoundError
+        return str(data_path)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"The file '{filename}' was not found in the 'data' directory.") from e
+    except Exception as e:
+        raise RuntimeError(f"An unexpected error occurred while trying to access '{filename}'.") from e
