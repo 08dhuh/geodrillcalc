@@ -6,9 +6,11 @@ name: Python package
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
+    tags: 
+      - 'v*'
+  # pull_request:
+  #   branches: [ "main" ]
+    
 jobs:
   build:
 
@@ -67,8 +69,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref_name }}
-        release_name: Release ${{ github.ref_name }}
+        tag_name: ${{GITHUB_REF##*/}}
+        release_name: Release ${tag_name}
         body: |
           Changes in this Release:
           - Built with Python 3.11
