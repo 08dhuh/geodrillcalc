@@ -26,6 +26,7 @@ def find_nearest_value(val,
     float
         The nearest value in the 'array' relative to 'val'. If 'one_size_larger' is True and a larger or equal value is not found, returns the next nominal casing size larger.
     """
+    #print(f'{__name__} invoked, args: {val, array, one_size_larger}')
     # casting applied
     if larger_than_or_equal_val:
         valid_vals = array[array >
@@ -33,8 +34,9 @@ def find_nearest_value(val,
     else:
         valid_vals = array
 
+    #print(f'valid_array_items: {valid_vals}')
     nearest_idx = np.argmin(np.abs(valid_vals - val))
-
+    #print(f'retrieving index: {nearest_idx} from {valid_vals}')
     return valid_vals[nearest_idx]
 
 

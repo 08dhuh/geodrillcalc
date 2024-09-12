@@ -5,8 +5,7 @@ import pandas as pd
 from geodrillcalc.utils.calc_utils import find_next_largest_value, query_diameter_table
 from ..wellbore_data_store import WellBoreDataStore
 from . import casing_calculation as cc, pump_calculation as cp, screen_calculation as ci
-from ..utils.utils import getlogger 
-
+from ..utils.utils import getlogger
 
 
 class CalcPipeline:
@@ -36,7 +35,7 @@ class CalcPipeline:
     ----------
     aquifer_layer_table : dict
         A dictionary containing details about aquifer layers.
-    
+
     initial_values : dict
         A dictionary containing initial values for wellbore calculations.
 
@@ -60,7 +59,7 @@ class CalcPipeline:
             An initialised instance of the WellBoreDataStore class, ready for calculations.
         logger : Logger, optional
             A logger instance to handle logging within the pipeline. Defaults to None.
-        
+
         Raises
         ------
         RuntimeError
@@ -68,7 +67,8 @@ class CalcPipeline:
         """
         self.wbd = wellboredict  # wellboredict must be a fully initialised instance
         if not self.wbd.ready_for_calculation:
-            raise RuntimeError(f"Input parameters must be assigned to WellBoreDataStore object before calling the current class {self.__name__}")
+            raise RuntimeError(
+                f"Input parameters must be assigned to WellBoreDataStore object before calling the current class {self.__name__}")
         self.casing_diameters_in_metres = self.wbd.get_casing_diameters()
         self.drilling_diameters_in_metres = self.wbd.get_drilling_diameters()
         self.logger = logger or getlogger()
@@ -89,7 +89,7 @@ class CalcPipeline:
         """
         logger = self.logger
         try:
-            self.wbd.ready_for_installation_output = False         
+            self.wbd.ready_for_installation_output = False
             self._screen_pipeline()
             self._pump_pipeline()
             self._casing_pipeline()
@@ -98,9 +98,10 @@ class CalcPipeline:
             logger.error(f"An error occurred during calculation: {str(e)}")
             raise ValueError from e
         except ZeroDivisionError as e:
-            logger.error(f"Zero division error occurred in interval calculations: {str(e)}")
+            logger.error(
+                f"Zero division error occurred in interval calculations: {str(e)}")
             raise ValueError from e
-        
+
     def _screen_pipeline(self):
         """
         Calculates and the following screen parameters in the WellBoreDataStore instance.
@@ -136,67 +137,72 @@ class CalcPipeline:
                                                wbd.bore_lifetime_per_day,
                                                wbd.aquifer_thickness,
                                                wbd.is_production_well)
-        
-        if wbd.is_production_well: #production pipeline
-            #define and populates 3 associated parameters
+
+        if wbd.is_production_well:  # production pipeline
+            # define and populates 3 associated parameters
             screen_df = pd.DataFrame(self.casing_diameters_in_metres,
-                                    columns=['production_casing_diameters'])
+                                     columns=['production_casing_diameters'])
             screen_df['production_casing_frictions'] = \
                 ci.calculate_casing_friction(wbd.depth_to_top_screen,
-                                            wbd.required_flow_rate_per_m3_sec,
-                                            self.casing_diameters_in_metres,
-                                            wbd.pipe_roughness_coeff)
-            
+                                             wbd.required_flow_rate_per_m3_sec,
+                                             self.casing_diameters_in_metres,
+                                             wbd.pipe_roughness_coeff)
+
             screen_df['production_minimum_screen_diameters'] = \
                 ci.calculate_minimum_screen_diameter(screen_df['production_casing_frictions'].to_numpy(),
-                                                    screen_length=ir['screen_length'],
-                                                    req_flow_rate=wbd.required_flow_rate_per_m3_sec,
-                                                    pipe_roughness_coeff=wbd.pipe_roughness_coeff
-                                                    )
+                                                     screen_length=ir['screen_length'],
+                                                     req_flow_rate=wbd.required_flow_rate_per_m3_sec,
+                                                     pipe_roughness_coeff=wbd.pipe_roughness_coeff
+                                                     )
 
             screen_df['production_screen_diameters'] = \
                 screen_df.apply(lambda row: find_next_largest_value
                                 (row['production_minimum_screen_diameters'],
-                                self.casing_diameters_in_metres)
+                                 self.casing_diameters_in_metres)
                                 if not np.isnan(row['production_minimum_screen_diameters'])
                                 else np.nan,
                                 axis=1)
             screen_df['total_casing'] =\
                 screen_df.apply(lambda row: ci.calculate_total_casing(row['production_casing_diameters'],
-                                                                        row['production_screen_diameters'],
-                                                                        wbd.depth_to_top_screen-10,
-                                                                        ir['screen_length']),
+                                                                      row['production_screen_diameters'],
+                                                                      wbd.depth_to_top_screen-10,
+                                                                      ir['screen_length']),
                                 axis=1)
             min_total_casing_production_screen_diameter = \
-            screen_df.iloc[screen_df['total_casing'].argmin(
-                skipna=True)]['production_screen_diameters']
+                screen_df.iloc[screen_df['total_casing'].argmin(
+                    skipna=True)]['production_screen_diameters']
             ir['min_total_casing_production_screen_diameter'] = min_total_casing_production_screen_diameter
-            setattr(self.wbd, 'screen_stage_table', screen_df) #stores the screen stage table to wbd
-            
-            screen_diameter = max(min_total_casing_production_screen_diameter, self.casing_diameters_in_metres[0])
+            # stores the screen stage table to wbd
+            setattr(self.wbd, 'screen_stage_table', screen_df)
+
+            screen_diameter = max(
+                min_total_casing_production_screen_diameter, self.casing_diameters_in_metres[0])
             ohd_min = ci.calculate_minimum_open_hole_diameter(wbd.required_flow_rate_per_m3_sec,
-                                                                     ir['screen_length'],
-                                                                     wbd.sand_face_velocity_production,
-                                                                     wbd.aquifer_average_porosity,
-                                                                     wbd.net_to_gross_ratio_aquifer)        
-            ohd = ci.calculate_open_hole_diameter(ohd_min, drilling_diameter_list)
-            ohd = ci.calibrate_open_hole_diameter(ohd, screen_diameter, wbd.casing_diameter_table)
-        else: #injection pipeline
-            #for the injection wells, the screen diameter depends on the open hole diameter
+                                                              ir['screen_length'],
+                                                              wbd.sand_face_velocity_production,
+                                                              wbd.aquifer_average_porosity,
+                                                              wbd.net_to_gross_ratio_aquifer)
+            ohd = ci.calculate_open_hole_diameter(
+                ohd_min, drilling_diameter_list)
+            ohd = ci.calibrate_open_hole_diameter(
+                ohd, screen_diameter, wbd.casing_diameter_table)
+        else:  # injection pipeline
+            # for the injection wells, the screen diameter depends on the open hole diameter
             ohd_min = ci.calculate_minimum_open_hole_diameter(wbd.required_flow_rate_per_m3_sec,
-                                                                     ir['screen_length'],
-                                                                     wbd.sand_face_velocity_injection,
-                                                                     wbd.aquifer_average_porosity,
-                                                                     wbd.net_to_gross_ratio_aquifer)            
-            ohd = ci.calculate_open_hole_diameter(ohd_min, drilling_diameter_list)
-            screen_diameter = query_diameter_table(ohd, wbd.drilling_diameter_table)
-            #screen_diameter of the injection well guaranteed to be greater than its open hole diameter
-        
+                                                              ir['screen_length'],
+                                                              wbd.sand_face_velocity_injection,
+                                                              wbd.aquifer_average_porosity,
+                                                              wbd.net_to_gross_ratio_aquifer)
+            ohd = ci.calculate_open_hole_diameter(
+                ohd_min, drilling_diameter_list)
+            screen_diameter = query_diameter_table(
+                ohd, wbd.drilling_diameter_table)
+            # screen_diameter of the injection well guaranteed to be greater than its open hole diameter
+
         ir['screen_diameter'] = screen_diameter
         ir['open_hole_diameter'] = ohd
         wbd.assign_parameters('installation', **ir)
 
-        
 
     def _pump_pipeline(self):
         """
@@ -215,7 +221,7 @@ class CalcPipeline:
         """
 
         wbd = self.wbd
-        pr = {}  
+        pr = {}
         pr['pump_inlet_depth'] = cp.calculate_pump_inlet_depth(wbd.groundwater_depth,
                                                                wbd.allowable_drawdown,
                                                                wbd.safety_margin,
@@ -262,7 +268,7 @@ class CalcPipeline:
         wbd = self.wbd
         logger = self.logger
         casing_stage_table = wbd.casing_stage_table.copy().drop(
-            ['drill_bit'], axis=1) #drill_bit column will be added in the last part
+            ['drill_bit'], axis=1)  # drill_bit column will be added in the last part
         is_production_well = wbd.is_production_well
 
         screen_diameter = wbd.screen_diameter
@@ -275,20 +281,10 @@ class CalcPipeline:
         ]
         casing_stage_table.loc['pre_collar'] = pre_collar
 
-        # ------superficial casing section
-        superficial_casing_required = cc.is_superficial_casing_required(
-            wbd.depth_to_aquifer_base)
-        logger.info(
-            f'superficial_casing_required: {superficial_casing_required}')
-        if superficial_casing_required:
-            casing_stage_table.loc['superficial_casing'] = \
-                [*cc.calculate_superficial_casing_depths(superficial_casing_required,
-                                                         wbd.depth_to_aquifer_base),
-                 cc.calculate_superficial_casing_diameter(superficial_casing_required)]
-        
+
         # ------pump chamber casing section
         intermediate_casing_diameter = screen_diameter
-        separate_pump_chamber_required = cc.is_separate_pump_chamber_required(is_production_well, #this is always false for injection wells
+        separate_pump_chamber_required = cc.is_separate_pump_chamber_required(is_production_well,  # this is always false for injection wells
                                                                               intermediate_casing_diameter,
                                                                               wbd.minimum_pump_housing_diameter)
         logger.info(
@@ -299,7 +295,7 @@ class CalcPipeline:
                             cc.calculate_pump_chamber_diameter(wbd.minimum_pump_housing_diameter,
                                                                self.casing_diameters_in_metres)]
             casing_stage_table.loc['pump_chamber_casing'] = pump_chamber
-        
+
         # ------intermediate_casing section
         intermediate_casing = [*cc.calculate_intermediate_casing_depths(wbd.depth_to_top_screen,
                                                                         separate_pump_chamber_required,
@@ -309,19 +305,40 @@ class CalcPipeline:
                                                                          wbd.min_total_casing_production_screen_diameter if is_production_well else 0,
                                                                          )]
         casing_stage_table.loc['intermediate_casing'] = intermediate_casing
+
+        # ------superficial casing section
+        superficial_casing_required = cc.is_superficial_casing_required(
+            wbd.depth_to_aquifer_base)
+        logger.info(
+            f'superficial_casing_required: {superficial_casing_required}')
+
+        if superficial_casing_required:
+            if separate_pump_chamber_required:
+                sc_diameter_seed = casing_stage_table.loc['pump_chamber_casing', 'casing']
+            else:
+                sc_diameter_seed = casing_stage_table.loc['intermediate_casing', 'casing']
+            #print(f'superficial_casing_diameter_seed: {sc_diameter_seed}, pump chamber required: {separate_pump_chamber_required}')
+            casing_stage_table.loc['superficial_casing'] = \
+                [*cc.calculate_superficial_casing_depths(superficial_casing_required,
+                                                         wbd.depth_to_aquifer_base),
+                 cc.calculate_superficial_casing_diameter(is_superficial_casing_required=superficial_casing_required,
+                                                          diameter=sc_diameter_seed,
+                                                          casing_diameters_in_metres=self.casing_diameters_in_metres
+                                                          )]
+
         # ------screen riser section
         casing_stage_table.loc['screen_riser'] = [*cc.calculate_screen_riser_depths(wbd.depth_to_top_screen),
-                                                 cc.calculate_screen_riser_diameter(screen_diameter)]
+                                                  cc.calculate_screen_riser_diameter(screen_diameter)]
         # ------screen section
         casing_stage_table.loc['screen'] = [*cc.calculate_screen_depths(wbd.depth_to_top_screen,
-                                                                                  screen_length,
-                                                                                  wbd.aquifer_thickness),
-                                                      screen_diameter]
-        
+                                                                        screen_length,
+                                                                        wbd.aquifer_thickness),
+                                            screen_diameter]
+
         casing_stage_table['drill_bit'] =\
             casing_stage_table.apply(lambda row: cc.calculate_drill_bit_diameter
-                                    (row['casing'],
-                                     wbd.casing_diameter_table) if not np.isnan(row['casing']) else row['casing'],
-                                    axis=1)
+                                     (row['casing'],
+                                      wbd.casing_diameter_table) if not np.isnan(row['casing']) else row['casing'],
+                                     axis=1)
 
         setattr(wbd, 'casing_stage_table', casing_stage_table)
