@@ -9,8 +9,11 @@ GeoDrillCalc is a Python package for calculating wellbore parameters and estimat
 * **Output Format:** Results are provided as dictionaries, which can be easily converted to JSON or used directly in other applications.
 
 ## Installation
+Install GeoDrillCalc directly from PyPI using `pip`:
 
-tbd
+```bash
+pip install geodrillcalc
+```
 
 ## Example Usage
 
