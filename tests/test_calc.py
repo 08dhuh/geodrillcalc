@@ -10,37 +10,42 @@ def test_pipeline():
     aquifer_layer_table = {
         "aquifer_layer": [
             '100qa',
-            '103utqd',
-            '105utaf',
-            '106utd',
-            '107umta',
-            '108umtd',
-            '109lmta',
+            #'103utqd',
+            #'105utaf',
+            #'106utd',
+            #'107umta',
+            #'108umtd',
+            #'109lmta',
             '111lta',
             '114bse'
         ],
         "is_aquifer": [
             True,
-            False,
-            True,
-            False,
-            True,
-            False,
-            True,
+            #False,
+            #True,
+            #False,
+            #True,
+            #False,
+            #True,
             True,
             False
         ],
         "depth_to_base": [
-            3,
-            53,
-            112,
-            150,
-            150,
-            1000,
-            1000,
-            1221,
-            1421
+            52,
+            477,
+            677
         ]
+        # "depth_to_base": [
+        #     3,
+        #     53,
+        #     112,
+        #     150,
+        #     150,
+        #     1000,
+        #     1000,
+        #     1221,
+        #     1421
+        # ]
     }
 
     initial_values = {
@@ -52,14 +57,14 @@ def test_pipeline():
         "long_term_decline_rate": 1,
         "allowable_drawdown": 25,
         "safety_margin": 25,
-        "target_aquifer_layer": "109lmta",
+        "target_aquifer_layer": "111lta",
         "top_aquifer_layer": "100qa"
     }
 
     gci = gdc.GeoDrillCalcInterface()
     gci.set_loglevel(0)
 
-    wbd = gci.calculate_and_return_wellbore_parameters(False, # True for production, false for injection
+    wbd = gci.calculate_and_return_wellbore_parameters(True, # True for production, false for injection
                                                        aquifer_layer_table,
                                     initial_values)
     #js = wbd.export_installation_results_to_json_string()

@@ -151,7 +151,7 @@ def calculate_pump_chamber_depths(is_pump_chamber_required: bool, pump_inlet_dep
 
 
 def calculate_intermediate_casing_diameter(screen_diameter,
-                                           casing_diameter_table,
+                                           casing_diameters_in_metres,
                                         smallest_production_casing_diameter):
     """
     Selects the largest of the given parameters as the intermediate casing diameter.
@@ -179,7 +179,7 @@ def calculate_intermediate_casing_diameter(screen_diameter,
     - The intermediate casing diameter is determined as the maximum value between the next largest casing diameter and the smallest production casing diameter.
     """
     intermediate_casing_diameter = max(find_next_largest_value(
-        screen_diameter, casing_diameter_table), smallest_production_casing_diameter)
+        screen_diameter, casing_diameters_in_metres), smallest_production_casing_diameter)
     return intermediate_casing_diameter
 
 
@@ -219,7 +219,7 @@ def is_separate_pump_chamber_required(is_production_well,
         return False
 
 
-def calculate_pump_chamber_diameter(minumum_pump_housing_diameter, casing_diameter_table):
+def calculate_pump_chamber_diameter(minumum_pump_housing_diameter, casing_diameters_in_metres):
     """
     Calculates the pump chamber diameter based on the minimum pump housing diameter and an array of nominal casing diameters.
 
@@ -240,7 +240,7 @@ def calculate_pump_chamber_diameter(minumum_pump_housing_diameter, casing_diamet
     - This function calculates the pump chamber diameter by finding the next largest value in the array of nominal casing diameters.
     """
     pump_chamber_diameter = find_next_largest_value(
-        minumum_pump_housing_diameter, casing_diameter_table)
+        minumum_pump_housing_diameter, casing_diameters_in_metres)
     return pump_chamber_diameter
 
 
@@ -319,7 +319,9 @@ def calculate_screen_riser_diameter(screen_diameter):
     return screen_diameter
 
 
-def calculate_superficial_casing_diameter(is_superficial_casing_required, diameter=None, casing_diameter_table=None):
+def calculate_superficial_casing_diameter(is_superficial_casing_required, 
+                                          diameter, 
+                                          casing_diameters_in_metres):
     """
     Calculates the diameter of superficial casing based on whether it is required.
 
@@ -346,8 +348,9 @@ def calculate_superficial_casing_diameter(is_superficial_casing_required, diamet
     - When a pump chamber is present, the superficial casing diameter is the next nominal standard casing larger than the pump chamber diameter.
     - When no pump chamber is present, the superficial casing diameter is the next nominal standard casing larger than the intermediate casing diameter.
     """
+    #TODO: implement this method properly
     if is_superficial_casing_required:
-        return find_next_largest_value(diameter, casing_diameter_table)
+        return find_next_largest_value(diameter, casing_diameters_in_metres)
     return np.nan
 
 
