@@ -202,7 +202,7 @@ class CalcPipeline:
         ir['screen_diameter'] = screen_diameter
         ir['open_hole_diameter'] = ohd
         wbd.assign_parameters('installation', **ir)
-        print('screen result:', ir)
+
 
     def _pump_pipeline(self):
         """
@@ -234,7 +234,7 @@ class CalcPipeline:
                                                        pump_diameter
                                                        )
         wbd.assign_parameters('installation', **pr)
-        print('pump result:', pr)
+
 
     def _casing_pipeline(self):
         """
@@ -280,7 +280,7 @@ class CalcPipeline:
             cc.calculate_pre_collar_casing_diameter()
         ]
         casing_stage_table.loc['pre_collar'] = pre_collar
-        print('casing: pre-colllar', pre_collar)
+
 
         # ------pump chamber casing section
         intermediate_casing_diameter = screen_diameter
@@ -317,7 +317,7 @@ class CalcPipeline:
                 sc_diameter_seed = casing_stage_table.loc['pump_chamber_casing', 'casing']
             else:
                 sc_diameter_seed = casing_stage_table.loc['intermediate_casing', 'casing']
-            print(f'superficial_casing_diameter_seed: {sc_diameter_seed}, pump chamber required: {separate_pump_chamber_required}')
+            #print(f'superficial_casing_diameter_seed: {sc_diameter_seed}, pump chamber required: {separate_pump_chamber_required}')
             casing_stage_table.loc['superficial_casing'] = \
                 [*cc.calculate_superficial_casing_depths(superficial_casing_required,
                                                          wbd.depth_to_aquifer_base),
