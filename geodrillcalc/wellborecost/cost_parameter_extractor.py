@@ -91,7 +91,7 @@ class CostParameterExtractor:
             "section_lengths": self._section_lengths,
             "individual_section_lengths": self._individial_section_lengths,
 
-            "section_diameters": self._get_section_diameters(outer=True),
+            "section_diameters": self._get_section_diameters(outer=False), #casing diameter
             "section_excavation_volumes": self._section_excavation_volumes,
             "total_gravel_volume": self._total_gravel_volume,
             "total_cement_volume": self._total_cement_volume,

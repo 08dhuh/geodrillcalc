@@ -318,14 +318,17 @@ class CostStageCalculator:
             material_costs_df = pd.concat(
                 [material_costs_df, pd.DataFrame(centraliser_row, index=['centraliser'])])
             
+            # print('\nmaterial_costs without bore sections')
+            # print(material_costs_df)
+
             # bore section cost calculation using the private method
             bore_section_costs = self._calculate_bore_section_material_costs()
             
             material_costs_df = pd.concat(
                 [material_costs_df, bore_section_costs])
 
-            print('\nmaterial: bore section costs')
-            print(bore_section_costs)
+            #print('\nmaterial: bore section costs')
+            #print(bore_section_costs)
             #print(f'centraliser:{centraliser_row}')
             # print('\nmaterial_cost: ')
             # print(material_costs_df)
@@ -340,39 +343,52 @@ class CostStageCalculator:
         Private method to calculate the bore section material costs.
         """
         try:
-            section_lengths = self.material_params["individual_section_lengths"]
-            section_diameters = self.material_params["section_diameters"]
+            #section_lengths = self.material_params["individual_section_lengths"]
+            #section_diameters = self.material_params["section_diameters"]
             
+            bore_section_params = pd.DataFrame({
+                'lengths': self.material_params["individual_section_lengths"],
+                'diameters': self.material_params["section_diameters"] * 1E3
+                })
 
-            bore_section_params = pd.DataFrame(
-                section_lengths.multiply(section_diameters) * 1E3)
+            # bore_section_params = pd.DataFrame(
+            #     section_lengths.multiply(section_diameters) * 1E3)
             bore_section_costs = pd.DataFrame(
                 index=bore_section_params.index, columns=['low', 'base', 'high'])
+            
+            #print(f'\nbore section params: {bore_section_params}')
             bore_section_costs['base'] = bore_section_params.apply(
                 lambda row: (
-                    row * self.material_cost_rates['pre_collar']['coefficient'] /
+                    row['lengths'] * row['diameters'] * self.material_cost_rates['pre_collar']['coefficient'] /
                     self.material_cost_rates['pre_collar']['divisor']
                     if row.name == 'pre_collar'
                     else (
-                        row * self.material_cost_rates['screen']['coefficient'] +
-                        self.material_cost_rates['screen']['offset']
+                        row['lengths'] * (row['diameters'] * self.material_cost_rates['screen']['coefficient'] +
+                        self.material_cost_rates['screen']['offset'])
                         if row.name == 'screen'
-                        else row * self.material_cost_rates['other_section']['coefficient'] + self.material_cost_rates['other_section']['offset']
+                        else row['lengths'] * \
+                            ( row['diameters'] * self.material_cost_rates['other_section']['coefficient'] + \
+                             self.material_cost_rates['other_section']['offset'])
                     )
                 ), axis=1
             )
             bore_section_costs['low'] = bore_section_costs.apply(
-                lambda row: max(row['base'] - section_lengths.get(row.name)
+                lambda row: max(row['base'] - bore_section_params.at[row.name, 'lengths']
                                 * self.material_cost_rates['bore_section_margin_rate'], 0)
-                if row.name != 'pre_collar' else row['base'] * (1 - PRE_COLLAR_MARGIN_RATE), axis=1
+                if row.name != 'pre_collar' 
+                else row['base'] * (1 - PRE_COLLAR_MARGIN_RATE), 
+                axis=1
             )
             bore_section_costs['high'] = bore_section_costs.apply(
-                lambda row: row['base'] + section_lengths.get(
-                    row.name) * self.material_cost_rates['bore_section_margin_rate']
-                if row.name != 'pre_collar' else row['base'] * (1 + PRE_COLLAR_MARGIN_RATE), axis=1
+                lambda row: row['base'] + bore_section_params.at[row.name, 'lengths']
+                * self.material_cost_rates['bore_section_margin_rate']
+                if row.name != 'pre_collar' 
+                else row['base'] * (1 + PRE_COLLAR_MARGIN_RATE), 
+                axis=1
             )
 
             return bore_section_costs
+        
         except KeyError as e:
             self.logger.error(f"Error in calculating bore section costs: {e}")
             raise
@@ -424,8 +440,8 @@ class CostStageCalculator:
                 index_labels=base_costs.keys()
             )
 
-            #print('other_costs')
-            #print(other_costs_df)
+            # print('other_costs')
+            # print(other_costs_df)
 
             return other_costs_df
         except KeyError as e:

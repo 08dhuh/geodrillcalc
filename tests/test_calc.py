@@ -62,7 +62,7 @@ def test_pipeline():
     }
 
     gci = gdc.GeoDrillCalcInterface()
-    gci.set_loglevel(0)
+    gci.set_loglevel(4)
 
     wbd = gci.calculate_and_return_wellbore_parameters(True, # True for production, false for injection
                                                        aquifer_layer_table,
