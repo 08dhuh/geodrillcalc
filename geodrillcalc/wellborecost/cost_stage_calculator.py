@@ -7,7 +7,7 @@ from ..utils.cost_utils import calculate_costs_with_df, populate_margin_function
 # TODO: get rid of these magic numbers
 PRE_COLLAR_MARGIN_RATE = 0.2  # 20% margin for pre-collar section
 CENTRALISER_COST_FACTOR_LOW = 2/3
-CENTRALISER_COST_FACTOR_HIGH = 1.5
+CENTRALISER_COST_FACTOR_HIGH = 4/3
 CENTRALISER_DEPTH_OFFSET_LOW = -20
 CENTRALISER_DEPTH_OFFSET_HIGH = 20
 
@@ -151,6 +151,9 @@ class CostStageCalculator:
             If any required parameter is missing from `drilling_rate_params` or `drilling_cost_rates`.
         """
         try:
+            #TODO: section drilling cost scaling factor - 1.5727 currently hardcoded
+            cost_scaling_factor = 1.5727
+
             total_well_depth = self.drilling_rate_params["total_well_depth"]
             drilling_section_length_diameter = pd.concat([self.drilling_rate_params['section_lengths'],
                                                           self.drilling_rate_params['section_diameters']], axis=1)
@@ -165,7 +168,7 @@ class CostStageCalculator:
 
             casing_stages_result = drilling_section_length_diameter.apply(
                 lambda row: max(row['length'] * (
-                    np.pi / 2 * row['diameter'] - self.drilling_cost_rates['diameter_based_offset']), 0), axis=1)
+                    cost_scaling_factor * row['diameter'] - self.drilling_cost_rates['diameter_based_offset']), 0), axis=1)
 
             casing_stages_result = pd.DataFrame({
                 'base': casing_stages_result
@@ -176,6 +179,9 @@ class CostStageCalculator:
             drilling_section_result[['low', 'high']] = np.nan
             drilling_section_result = drilling_section_result[[
                 'low', 'base', 'high']]
+            
+            # print('\ndrilling_section_result')
+            # print(drilling_section_result)
 
             return drilling_section_result
         except KeyError as e:
@@ -244,6 +250,9 @@ class CostStageCalculator:
                 index_labels=base_costs.keys()
             )
 
+            # print('\ntime rates:')
+            # print(time_rates_df)
+
             return time_rates_df
 
         except (ValueError, KeyError) as e:
@@ -271,14 +280,17 @@ class CostStageCalculator:
         """
         try:
             total_well_depth = self.material_params["total_well_depth"]
-            section_lengths = self.material_params["section_lengths"]
-            section_diameters = self.material_params["section_diameters"]
+            individual_section_lengths = self.material_params["individual_section_lengths"]
             section_excavation_volumes = self.material_params["section_excavation_volumes"]
+            #print(f'section excatvation volumes')
+            #print(section_excavation_volumes)
             total_excavation_volume = section_excavation_volumes.sum()
+            #print(f"total exc volume: {total_excavation_volume}")
             total_gravel_volume = self.material_params["total_gravel_volume"]
             total_cement_volume = self.material_params["total_cement_volume"]
             operational_section_count = self.material_params["operational_section_count"]
-
+            #print(f"total gravel volume: {total_gravel_volume}")
+            #print(f"total cement volume: {total_cement_volume}")
             base_costs = {
                 'cement': total_cement_volume * self.material_cost_rates['cement_rate_per_cubic_meter'],
                 'gravel': total_gravel_volume * self.material_cost_rates['gravel_rate_per_cubic_meter'],
@@ -296,10 +308,46 @@ class CostStageCalculator:
                 index_labels=base_costs.keys()
             )
 
+            #centraliser cost calculation
+            total_well_depth_without_screen = individual_section_lengths.iloc[:-2].sum()
+            centraliser_row = {
+                'low': max(self.material_cost_rates['centraliser_rate_per_meter'] * CENTRALISER_COST_FACTOR_LOW * (total_well_depth_without_screen + CENTRALISER_DEPTH_OFFSET_LOW), 0),
+                'base': self.material_cost_rates['centraliser_rate_per_meter'] * total_well_depth,
+                'high': self.material_cost_rates['centraliser_rate_per_meter'] * CENTRALISER_COST_FACTOR_HIGH * (total_well_depth_without_screen + CENTRALISER_DEPTH_OFFSET_HIGH)
+            }
+            material_costs_df = pd.concat(
+                [material_costs_df, pd.DataFrame(centraliser_row, index=['centraliser'])])
+            
+            # bore section cost calculation using the private method
+            bore_section_costs = self._calculate_bore_section_material_costs()
+            
+            material_costs_df = pd.concat(
+                [material_costs_df, bore_section_costs])
+
+            print('\nmaterial: bore section costs')
+            print(bore_section_costs)
+            #print(f'centraliser:{centraliser_row}')
+            # print('\nmaterial_cost: ')
+            # print(material_costs_df)
+            return material_costs_df
+        except KeyError as e:
+            self.logger.error(
+                f"Error in calculating material costs: {e} at line {e.__traceback__.tb_lineno}")
+            raise
+
+    def _calculate_bore_section_material_costs(self) -> pd.DataFrame:
+        """
+        Private method to calculate the bore section material costs.
+        """
+        try:
+            section_lengths = self.material_params["individual_section_lengths"]
+            section_diameters = self.material_params["section_diameters"]
+            
+
             bore_section_params = pd.DataFrame(
                 section_lengths.multiply(section_diameters) * 1E3)
             bore_section_costs = pd.DataFrame(
-                index=bore_section_params.index, columns=['base', 'low', 'high'])
+                index=bore_section_params.index, columns=['low', 'base', 'high'])
             bore_section_costs['base'] = bore_section_params.apply(
                 lambda row: (
                     row * self.material_cost_rates['pre_collar']['coefficient'] /
@@ -324,23 +372,9 @@ class CostStageCalculator:
                 if row.name != 'pre_collar' else row['base'] * (1 + PRE_COLLAR_MARGIN_RATE), axis=1
             )
 
-            material_costs_df = pd.concat(
-                [material_costs_df, bore_section_costs])
-
-            total_well_depth_without_screen = section_lengths.iloc[:-2].sum()
-            # append centraliser
-            centraliser_row = {
-                'low': max(self.material_cost_rates['centraliser_rate_per_meter'] * CENTRALISER_COST_FACTOR_LOW * (total_well_depth_without_screen + CENTRALISER_DEPTH_OFFSET_LOW), 0),
-                'base': self.material_cost_rates['centraliser_rate_per_meter'] * total_well_depth,
-                'high': self.material_cost_rates['centraliser_rate_per_meter'] * CENTRALISER_COST_FACTOR_HIGH * (total_well_depth_without_screen + CENTRALISER_DEPTH_OFFSET_HIGH)
-            }
-            material_costs_df = pd.concat(
-                [material_costs_df, pd.DataFrame(centraliser_row, index=['centraliser'])])
-
-            return material_costs_df
+            return bore_section_costs
         except KeyError as e:
-            self.logger.error(
-                f"Error in calculating material costs: {e} at line {e.__traceback__.tb_lineno}")
+            self.logger.error(f"Error in calculating bore section costs: {e}")
             raise
 
     def calculate_other_components_cost(self) -> pd.DataFrame:
@@ -370,13 +404,16 @@ class CostStageCalculator:
             pre_collar_length = section_lengths['pre_collar']
             screen_length = section_lengths['screen']
 
+            total_casing_length = self.other_params['total_casing_length']
+
             base_costs = {
                 'disinfection_drilling_plant': self.other_cost_rates['disinfection_drilling_plant_rate'],
                 'mobilisation_demobilization': self.other_cost_rates['mobilisation_demobilization_rate_per_day'] * drilling_time,
                 'installation_grouting_pre_collar': self.other_cost_rates['installation_grouting_pre_collar_rate_per_meter'] * pre_collar_length,
                 'wireline_logging': self.other_cost_rates['wireline_logging_rate_per_meter'] * total_well_depth,
-                'fabrication_installation': self.other_cost_rates['fabrication_installation_rate_per_meter'] * (total_well_depth - pre_collar_length),
-                'cement_casing': self.other_cost_rates['cement_casing_rate_per_meter'] * (total_well_depth - pre_collar_length),
+                'fabrication_installation': self.other_cost_rates['fabrication_installation_rate_per_meter'] * (total_casing_length),
+                #d
+                'cement_casing': self.other_cost_rates['cement_casing_rate_per_meter'] * (total_well_depth - screen_length),
                 'pack_gravel': self.other_cost_rates['gravel_pack_rate_per_meter'] * screen_length,
                 'subcontract_welders': self.other_cost_rates['subcontract_welders_rate_per_day'] * drilling_time
             }
@@ -386,6 +423,9 @@ class CostStageCalculator:
                 margin_functions=self.margin_functions.loc['others'],
                 index_labels=base_costs.keys()
             )
+
+            #print('other_costs')
+            #print(other_costs_df)
 
             return other_costs_df
         except KeyError as e:

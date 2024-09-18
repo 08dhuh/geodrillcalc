@@ -40,7 +40,7 @@
     "mobilisation_demobilization_rate_per_day": 1000,
     "installation_grouting_pre_collar_rate_per_meter": 300,
     "wireline_logging_rate_per_meter": 11,
-    "fabrication_installation_rate_per_meter": 75,
+    "fabrication_installation_rate_per_meter": 50,
     "cement_casing_rate_per_meter": 43,
     "gravel_pack_rate_per_meter": 22,
     "subcontract_welders_rate_per_day": 200

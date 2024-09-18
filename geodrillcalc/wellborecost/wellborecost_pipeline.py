@@ -281,6 +281,8 @@ class CostPipeline:
                 cost_stage_calculator.calculate_drilling_rates_total_cost(total_cost_table.at['drilling_rates', 'base'])
             grand_total = total_cost_table.sum(axis=0)
             total_cost_table.loc['total_cost'] = grand_total
+            print('\n Total cost:')
+            print(total_cost_table)
             return total_cost_table
 
         except Exception as e:

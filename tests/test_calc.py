@@ -74,7 +74,7 @@ def test_pipeline():
     assert wbd.ready_for_cost_output
 
     result = wbd.export_results_to_dict()
-    print(result)
+    #print(result)
     #print(js)
 
     # with open('geodrillcalc/data/fallback_cost_rates.json') as f:

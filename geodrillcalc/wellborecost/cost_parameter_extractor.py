@@ -89,6 +89,8 @@ class CostParameterExtractor:
         return {
             "total_well_depth": self._total_well_depth,
             "section_lengths": self._section_lengths,
+            "individual_section_lengths": self._individial_section_lengths,
+
             "section_diameters": self._get_section_diameters(outer=True),
             "section_excavation_volumes": self._section_excavation_volumes,
             "total_gravel_volume": self._total_gravel_volume,
@@ -101,18 +103,52 @@ class CostParameterExtractor:
         return {
             "total_well_depth": self._total_well_depth,
             "section_lengths": self._section_lengths,
-            "drilling_time": self._calculate_drilling_time()
+            "drilling_time": self._calculate_drilling_time(),
+            "total_casing_length": self._individial_section_lengths.iloc[1:].sum()
         }
 
     @property
     def _total_well_depth(self) -> float:
-        return self.wbd.depth_to_top_screen + self.wbd.screen_length
+        return self._section_lengths.sum()
+        #return self.wbd.depth_to_top_screen + self.wbd.screen_length
+
+    @property
+    def _individial_section_lengths(self) -> pd.Series:
+        try:
+            st = self.wbd.casing_stage_table
+            individual_section_lengths = st['bottom'].subtract(st['top'], fill_value=0).fillna(0)
+            return individual_section_lengths
+        except (AttributeError, KeyError) as e:
+            self.logger.error(f"Error calculating individual section lengths: {e}")
+            return pd.Series(dtype='float64')
 
     @property
     def _section_lengths(self) -> pd.Series:
         try:
             st = self.wbd.casing_stage_table
-            return st['bottom'].subtract(st['top'], fill_value=0).fillna(0)
+            #fill in the section column 
+            section_lengths = st['bottom'].subtract(st['top'], fill_value=0).fillna(0)
+            
+            if not pd.isna(st.loc['superficial_casing', 'bottom']):
+                section_lengths['superficial_casing'] = st.loc['superficial_casing', 'bottom'] \
+                - st.loc['pre_collar', 'bottom']
+                
+            if not pd.isna(st.loc['pump_chamber_casing', 'bottom']):
+                section_lengths['pump_chamber_casing'] = st.loc['pump_chamber_casing', 'bottom'] \
+                - max(st.loc['pre_collar', 'bottom'] , st.loc['superficial_casing','bottom']) 
+            
+            section_lengths['intermediate_casing'] = st.loc['intermediate_casing', 'bottom'] \
+                - max(st.loc['pre_collar', 'bottom'] , 
+                      st.loc['superficial_casing','bottom'], 
+                      st.loc['pump_chamber_casing','bottom'])
+            section_lengths['screen_riser'] = st.loc['screen_riser', 'bottom'] \
+                - st.loc['intermediate_casing','bottom']
+            section_lengths['screen'] = st.loc['screen', 'bottom'] \
+                - st.loc['screen_riser','bottom']
+
+            #print('section_lengths:')
+            #print(section_lengths)
+            return section_lengths
         except (AttributeError, KeyError) as e:
             self.logger.error(f"Error calculating section lengths: {e}")
             return pd.Series(dtype='float64')
@@ -218,7 +254,7 @@ class CostParameterExtractor:
         """
         try:
             assert drilling_rate_per_day > 0
-            return base_day + self._total_well_depth / drilling_rate_per_day
+            return base_day + np.ceil(self._total_well_depth / drilling_rate_per_day)
         except AssertionError as e:
             self.logger.error(f"Drilling rate per day must be greater than 0: {e}")
             return 0
