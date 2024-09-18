@@ -171,7 +171,7 @@ class CostPipeline:
         """
         self.inputs_valid = self._validate_inputs()
         if not self.inputs_valid:
-            logger.warning("Invalid cost rates or margin rates. Cost calculation pipeline cannot run with invalid inputs.")
+            logger.info("Cost rates or margin rates file not found. Reverting to default fallback rates.")
 
             if not self._validate_cost_rates():
                 self._load_fallback_rates(get_data_path('fallback_cost_rates.json'), 'cost_rates')
@@ -207,6 +207,7 @@ class CostPipeline:
             self.wbd.assign_parameters(stage='cost',
                                        **outputs
                                    )
+
         else:
             logger.error("Cost calculation failed.")
 
@@ -281,6 +282,11 @@ class CostPipeline:
                 cost_stage_calculator.calculate_drilling_rates_total_cost(total_cost_table.at['drilling_rates', 'base'])
             grand_total = total_cost_table.sum(axis=0)
             total_cost_table.loc['total_cost'] = grand_total
+            
+            logger.info(f"\ncost estimation table: {cost_estimation_table}")
+            logger.info('\n Total cost:')
+            logger.info(total_cost_table)
+            
             return total_cost_table
 
         except Exception as e:

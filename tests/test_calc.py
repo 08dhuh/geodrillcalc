@@ -62,7 +62,7 @@ def test_pipeline():
     }
 
     gci = gdc.GeoDrillCalcInterface()
-    gci.set_loglevel(0)
+    gci.set_loglevel(4)
 
     wbd = gci.calculate_and_return_wellbore_parameters(True, # True for production, false for injection
                                                        aquifer_layer_table,
@@ -74,7 +74,7 @@ def test_pipeline():
     assert wbd.ready_for_cost_output
 
     result = wbd.export_results_to_dict()
-    print(result)
+    #print(result)
     #print(js)
 
     # with open('geodrillcalc/data/fallback_cost_rates.json') as f:
