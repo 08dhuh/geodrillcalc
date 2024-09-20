@@ -11,29 +11,32 @@ def test_pipeline():
         "aquifer_layer": [
             '100qa',
             #'103utqd',
-            #'105utaf',
+            '105utaf',
             #'106utd',
-            #'107umta',
+            '107umta',
             #'108umtd',
-            #'109lmta',
+            '109lmta',
             '111lta',
             '114bse'
         ],
         "is_aquifer": [
             True,
             #False,
-            #True,
+            True,
             #False,
-            #True,
+            True,
             #False,
-            #True,
+            True,
             True,
             False
         ],
         "depth_to_base": [
-            52,
-            477,
-            677
+            69,
+            182,
+            540,
+            552,
+            698,
+            898
         ]
         # "depth_to_base": [
         #     3,
@@ -49,15 +52,15 @@ def test_pipeline():
     }
 
     initial_values = {
-        "required_flow_rate": 4320,
-        "hydraulic_conductivity": 5,
+        "required_flow_rate": 690,
+        "hydraulic_conductivity": 5.5,
         "average_porosity": 0.25,
         "bore_lifetime_year": 30,
-        "groundwater_depth": 25,
-        "long_term_decline_rate": 1,
-        "allowable_drawdown": 25,
-        "safety_margin": 25,
-        "target_aquifer_layer": "111lta",
+        "groundwater_depth": 20,
+        "long_term_decline_rate": 0,
+        "allowable_drawdown": 20,
+        "safety_margin": 10,
+        "target_aquifer_layer": "109lmta",
         "top_aquifer_layer": "100qa"
     }
 
