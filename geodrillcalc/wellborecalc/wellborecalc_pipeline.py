@@ -6,8 +6,9 @@ from geodrillcalc.utils.calc_utils import find_next_largest_value, query_diamete
 from ..wellbore_data_store import WellBoreDataStore
 from . import casing_calculation as cc, pump_calculation as cp, screen_calculation as ci
 from ..utils.utils import getlogger
+from ..utils.calc_utils import check_initial_calculation_feasibility, check_casing_feasibility
 
-
+#TODO: error messages: The algorithm is unable to design an appropriate bore for that location. Please choose another location.
 class CalcPipeline:
     """
     A class designed to calculate wellbore model parameters using a WellBoreDataStore instance.
@@ -66,9 +67,6 @@ class CalcPipeline:
             If the WellBoreDataStore instance is not ready for calculation.
         """
         self.wbd = wellboredict  # wellboredict must be a fully initialised instance
-        if not self.wbd.ready_for_calculation:
-            raise RuntimeError(
-                f"Input parameters must be assigned to WellBoreDataStore object before calling the current class {self.__name__}")
         self.casing_diameters_in_metres = self.wbd.get_casing_diameters()
         self.drilling_diameters_in_metres = self.wbd.get_drilling_diameters()
         self.logger = logger or getlogger()
@@ -89,13 +87,23 @@ class CalcPipeline:
         """
         logger = self.logger
         try:
+
+            if not self.wbd.ready_for_calculation:
+                raise RuntimeError(
+                f"Input parameters must be assigned to WellBoreDataStore object before calling the current class {self.__name__}")
+            #validate wellbore design feasibility
+            check_initial_calculation_feasibility(self.wbd.aquifer_layer_table)
+            
             self.wbd.ready_for_installation_output = False
             self._screen_pipeline()
             self._pump_pipeline()
             self._casing_pipeline()
+
+            #validate wellbore design output parameters
+            check_casing_feasibility(self.wbd.casing_stage_table)
+
             self.wbd.ready_for_installation_output = True
         except ValueError as e:
-            logger.error(f"An error occurred during calculation: {str(e)}")
             raise ValueError from e
         except ZeroDivisionError as e:
             logger.error(

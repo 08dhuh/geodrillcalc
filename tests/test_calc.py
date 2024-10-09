@@ -38,17 +38,7 @@ def test_pipeline():
             698,
             898
         ]
-        # "depth_to_base": [
-        #     3,
-        #     53,
-        #     112,
-        #     150,
-        #     150,
-        #     1000,
-        #     1000,
-        #     1221,
-        #     1421
-        # ]
+
     }
 
     initial_values = {
@@ -77,7 +67,7 @@ def test_pipeline():
     assert wbd.ready_for_cost_output
 
     result = wbd.export_results_to_dict()
-    #print(result)
+    print(result)
     #print(js)
 
     # with open('geodrillcalc/data/fallback_cost_rates.json') as f:

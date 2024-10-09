@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import pandas as pd
 import numpy as np
-import logging, json
+import logging
 
 logger=None
 
@@ -32,7 +32,7 @@ def getlogger(log_level='INFO') -> logging.Logger:
     return logger
 
 
-def serialize_results(obj, keys, to_json: bool = True):
+def serialize_results(obj, keys):
     """
     Serialises the specified attributes of an object.
 
@@ -68,17 +68,11 @@ def serialize_results(obj, keys, to_json: bool = True):
             if isinstance(value.index, pd.MultiIndex):
                 # Convert MultiIndex DataFrame to a dictionary and handle NaNs
                 value_dict = value.reset_index().replace(np.nan, None).to_dict(orient='records')
-                if to_json:
-                    results[key] = json.dumps(value_dict)
-                else:
-                    results[key] = value_dict
+                results[key] = value_dict
             else:
                 # Handle single-indexed DataFrame
                 value = value.replace(np.nan, None)
-                if to_json:
-                    results[key] = value.to_json()
-                else:
-                    results[key] = value
+                results[key] = value
         else:
             results[key] = value
     return results
