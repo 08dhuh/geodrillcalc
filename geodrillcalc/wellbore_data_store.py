@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import pandas as pd
-import json
+
 
 from .utils.utils import getlogger, serialize_results
 
@@ -34,11 +34,9 @@ class WellBoreDataStore:
     initialise_and_validate_input_params(self, **kwargs):
         Initialises and validates the input data for wellbore calculations.
 
-    export_results_to_dict(self, to_json=False):
+    export_results_to_dict(self):
         Exports the results of the wellbore calculations to a dictionary.
 
-    export_results_to_json_string(self):
-        Exports the results of the wellbore calculations to a JSON string.
 
     get_casing_diameters(self, metric='metres', as_numpy=True):
         Returns casing diameters as a numpy array or pandas Series.
@@ -131,44 +129,44 @@ class WellBoreDataStore:
         # ----------------------------------------------------------------
 
     def _initialise_calculation_parameters(self, **kwargs):
-        self._assign_initial_input_params(self.initial_param_names, **kwargs)
-        self.required_flow_rate_per_litre_sec = self.required_flow_rate / 86.4
-        self.required_flow_rate_per_m3_sec = self.required_flow_rate / 86400
-        self.bore_lifetime_per_day = self.bore_lifetime_year * 365
+        try:
+            self._assign_initial_input_params(self.initial_param_names, **kwargs)
+            self.required_flow_rate_per_litre_sec = self.required_flow_rate / 86.4
+            self.required_flow_rate_per_m3_sec = self.required_flow_rate / 86400
+            self.bore_lifetime_per_day = self.bore_lifetime_year * 365
 
-        self._initialise_aquifer_layer_table(kwargs.get('aquifer_layer_table'))
+            self._initialise_aquifer_layer_table(kwargs.get('aquifer_layer_table'))
 
-        # Validate and assign target aquifer layer
-        self._validate_aquifer_layer(
-            self.target_aquifer_layer, "Target aquifer")
-        target_index = self._validate_target_aquifer_layer()
-        self.depth_to_top_screen = self.aquifer_layer_table.loc[
-            self.target_aquifer_layer]['depth_to_base']
-        self.aquifer_thickness = self.aquifer_layer_table.iloc[target_index +
-                                                               1]['depth_to_base'] - self.depth_to_top_screen
+            # Validate and assign target aquifer layer
+            # self._validate_aquifer_layer(
+            #     self.target_aquifer_layer, "Target aquifer")
+            target_index = self.aquifer_layer_table.index.get_loc(
+             self.target_aquifer_layer)
+            self.depth_to_top_screen = self.aquifer_layer_table.loc[
+                self.target_aquifer_layer]['depth_to_base']
+            self.aquifer_thickness = self.aquifer_layer_table.iloc[target_index +
+                                                                1]['depth_to_base'] - self.depth_to_top_screen
 
-        # Validate and assign top aquifer layer
-        self._validate_aquifer_layer(
-            self.top_aquifer_layer, "Top aquifer layer")
-        self._validate_top_aquifer_layer()
-        self.depth_to_aquifer_base = self.aquifer_layer_table.loc[
-            self.top_aquifer_layer]['depth_to_base']
+            # Validate and assign top aquifer layer
+            # self._validate_aquifer_layer(
+            #     self.top_aquifer_layer, "Top aquifer layer")
+            # self._validate_top_aquifer_layer()
+            self.depth_to_aquifer_base = self.aquifer_layer_table.loc[
+                self.top_aquifer_layer]['depth_to_base']
 
-        # Final validation before calculation
-        self._validate_initial_inputs()
-        self.ready_for_calculation = True
+            # Final validation before calculation
+            self._validate_initial_inputs()
+            self.ready_for_calculation = True
+        except Exception as e:
+            self.logger.exception(e)
+            raise e
 
     
 # ------export utils----------------------
     def export_installation_results_to_dict(self,
-                                            to_json=False):
+                                            ):
         """
         Exports the results of the installation calculations as a dictionary.
-
-        Parameters
-        ----------
-        to_json : bool, optional
-            If True, stores the pandas DataFrame items as JSON strings. Defaults to False.
 
         Returns
         -------
@@ -180,18 +178,13 @@ class WellBoreDataStore:
             return
         results = serialize_results(self,
                                     self.installation_output_attribute_names,
-                                    to_json=to_json)
+                                    )
         return results
 
 
-    def export_cost_results_to_dict(self, to_json=False):
+    def export_cost_results_to_dict(self):
         """
         Exports the results of the cost estimation calculations as a dictionary.
-
-        Parameters
-        ----------
-        to_json : bool, optional
-            If True, stores the pandas DataFrame items as JSON strings. Defaults to False.
 
         Returns
         -------
@@ -204,28 +197,23 @@ class WellBoreDataStore:
             return
         results = serialize_results(self,
                                     self.cost_output_attribute_names,
-                                    to_json=to_json)
+                                    )
         return results
 
-    def export_results_to_dict(self, to_json=False):
+    def export_results_to_dict(self):
         """
         Exports the combined results of both installation and cost estimation calculations as a dictionary.
 
-        Parameters
-        ----------
-        to_json : bool, optional
-            If True, stores the pandas DataFrame items as JSON strings. Defaults to False.
 
         Returns
         -------
         dict
-            A dictionary containing the combined results from both installation and cost estimation stages,
-            or a JSON string if to_json is True.
+            A dictionary containing the combined results from both installation and cost estimation stages
         """
         # Export installation and cost results
         installation_results = self.export_installation_results_to_dict(
-            to_json=False)
-        cost_results = self.export_cost_results_to_dict(to_json=False)
+           )
+        cost_results = self.export_cost_results_to_dict()
 
         # Combine the results
         combined_results = {
@@ -234,8 +222,6 @@ class WellBoreDataStore:
         }
 
         # Convert to JSON if requested
-        if to_json:
-            return json.dumps(combined_results)
 
         return combined_results
     
@@ -327,6 +313,7 @@ class WellBoreDataStore:
                 aquifer_layer_table_pd = pd.DataFrame(aquifer_layer_table)
             except ValueError as e:
                 self.logger.error(e)
+                raise e
         else:
             aquifer_layer_table_pd = aquifer_layer_table.copy()
         columns = ["aquifer_layer", "is_aquifer", "depth_to_base"]
@@ -379,40 +366,40 @@ class WellBoreDataStore:
 
 # -----validation private methods----------------------
 
-    def _validate_aquifer_layer(self, layer_name: str, context: str):
-        """
-        Validates the presence of an aquifer layer in the aquifer layer table.
+    # def _validate_aquifer_layer(self, layer_name: str, context: str):
+    #     """
+    #     Validates the presence of an aquifer layer in the aquifer layer table.
 
-        Parameters
-        ----------
-        layer_name : str
-            The name of the aquifer layer to validate.
-        context : str
-            The context in which the layer is being validated, for error messaging.
+    #     Parameters
+    #     ----------
+    #     layer_name : str
+    #         The name of the aquifer layer to validate.
+    #     context : str
+    #         The context in which the layer is being validated, for error messaging.
 
-        Raises
-        ------
-        ValueError
-            If the aquifer layer is not found in the table.
-        """
-        if layer_name not in self.aquifer_layer_table.index:
-            raise ValueError(
-                f"{context}: '{layer_name}' not found in the aquifer layer table.")
-        return True
+    #     Raises
+    #     ------
+    #     ValueError
+    #         If the aquifer layer is not found in the table.
+    #     """
+    #     if layer_name not in self.aquifer_layer_table.index:
+    #         raise ValueError(
+    #             f"{context}: '{layer_name}' not found in the aquifer layer table.")
+    #     return True
 
-    def _validate_target_aquifer_layer(self):
-        target_index = self.aquifer_layer_table.index.get_loc(
-            self.target_aquifer_layer)
-        if target_index >= len(self.aquifer_layer_table.index) - 1:
-            raise ValueError(
-                f"Target aquifer '{self.target_aquifer_layer}' is the bottommost layer, which is not allowed.")
-        return target_index
+    # def _validate_target_aquifer_layer(self):
+    #     target_index = self.aquifer_layer_table.index.get_loc(
+    #         self.target_aquifer_layer)
+    #     if target_index >= len(self.aquifer_layer_table.index) - 1:
+    #         raise ValueError(
+    #             f"Target aquifer '{self.target_aquifer_layer}' is the bottommost layer, which is not allowed.")
+    #     return target_index
 
-    def _validate_top_aquifer_layer(self):
-        # TODO: Improve the logic after discussion
-        if self.top_aquifer_layer not in ['100qa', '102utqa']:
-            raise ValueError(
-                f"Top aquifer layer must be either '100qa' or '102utqa', but received '{self.top_aquifer_layer}'.")
+    # def _validate_top_aquifer_layer(self):
+    #     # TODO: Improve the logic after discussion
+    #     if self.top_aquifer_layer not in ['100qa', '102utqa']:
+    #         raise ValueError(
+    #             f"Top aquifer layer must be either '100qa' or '102utqa', but received '{self.top_aquifer_layer}'.")
 
     def _validate_initial_inputs(self):
         """ 

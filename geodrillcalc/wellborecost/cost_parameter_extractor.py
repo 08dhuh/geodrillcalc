@@ -192,11 +192,14 @@ class CostParameterExtractor:
             inner_radii = self._get_section_diameters(outer=False) / 2
             volumes = np.pi * (outer_radii**2 - inner_radii**2) * lengths
             if volumes.min() < 0:
-                raise ValueError(f"Negative volume detected: {volumes.min()}")
+                raise ValueError(f"Negative volume detected: {volumes[volumes < 0]}")
             return volumes
         except (AttributeError, KeyError, ValueError) as e:
-            self.logger.error(f"Error calculating section annular volumes: {e}")
-            return pd.Series(dtype='float64')
+            self.logger.warning(f"Error calculating section annular volumes: {e}")
+            #return pd.Series(dtype='float64')
+            volumes[volumes < 0 ] = 0
+        finally:
+            return volumes
 
     @property
     def _total_cement_volume(self) -> float:

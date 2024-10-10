@@ -109,21 +109,24 @@ class GeoDrillCalcInterface:
         WellBoreDataStore
             An instance containing the results.
         """
-        self._initialise_wbd(is_production_well, 
-                         aquifer_layer_table, 
-                                                   
-                        initial_input_params,
-                        )
-        # Run the calculation pipeline to process wellbore parameters
-        self.calcpl = CalcPipeline(self.wbd)
-        self.calcpl.calc_pipeline()
+        try:
+            self._initialise_wbd(is_production_well, 
+                            aquifer_layer_table,                                                    
+                            initial_input_params,
+                            )
+            # Run the calculation pipeline to process wellbore parameters
+            self.calcpl = CalcPipeline(self.wbd)
+            self.calcpl.calc_pipeline()
 
-        # Run the cost calculation pipeline (must be done after the CalcPipeline)
-        self.costpl = CostPipeline(self.wbd, cost_rates, margin_rates)
-        self.costpl.calc_pipeline()
-        
-        self._log_outcome()
-        return self.wbd
+            # Run the cost calculation pipeline (must be done after the CalcPipeline)
+            self.costpl = CostPipeline(self.wbd, cost_rates, margin_rates)
+            self.costpl.calc_pipeline()
+            
+            self._log_outcome()
+            return self.wbd
+        except Exception as e:
+            self.logger.exception("Wellbore calculation failed")
+            raise e
 
     
     
@@ -185,7 +188,7 @@ class GeoDrillCalcInterface:
         """
         return self.wbd.export_installation_results_to_dict(to_json=to_json)
     
-    def export_cost_results_to_dict(self, to_json=False):
+    def export_cost_results_to_dict(self):
         """
         Retrieves the installation cost results from the instance's WellBoreDataStore attribute.
 
@@ -199,10 +202,10 @@ class GeoDrillCalcInterface:
         dict or str
             A dictionary containing the combined results from both stages, or a JSON string if `to_json` is True.
         """
-        return self.wbd.export_cost_results_to_dict(to_json=to_json)
+        return self.wbd.export_cost_results_to_dict()
 
-    
-    def export_results_to_dict(self, to_json=False):
+    #TODO: disable support for json outputs
+    def export_results_to_dict(self):
         """
         Retrieves the calculated results from the instance's WellBoreDataStore attribute.
 
@@ -219,19 +222,19 @@ class GeoDrillCalcInterface:
         combined_results = {}
 
         try:
-            combined_results["installation_results"] = self.wbd.export_installation_results_to_dict(to_json)
+            combined_results["installation_results"] = self.wbd.export_installation_results_to_dict()
         except Exception as e:
             self.logger.error(f"Failed to retrieve installation results: {e}")
             combined_results["installation_results"] = None
+            raise RuntimeError from e
 
         try:
-            combined_results["cost_results"] = self.wbd.export_cost_results_to_dict(to_json)
+            combined_results["cost_results"] = self.wbd.export_cost_results_to_dict()
         except Exception as e:
             self.logger.error(f"Failed to retrieve cost results: {e}")
             combined_results["cost_results"] = None
+            raise RuntimeError from e
 
-        if to_json:
-            return json.dumps(combined_results)
         
         return combined_results
     
