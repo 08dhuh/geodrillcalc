@@ -135,8 +135,8 @@ class WellBoreDataStore:
             self.required_flow_rate_per_m3_sec = self.required_flow_rate / 86400
             self.bore_lifetime_per_day = self.bore_lifetime_year * 365
 
-            self._initialise_aquifer_layer_table(kwargs.get('aquifer_layer_table'))
-
+            #self._initialise_aquifer_layer_table(kwargs.get('aquifer_layer_table'))
+            self.aquifer_layer_table = (kwargs.get('aquifer_layer_table'))
             # Validate and assign target aquifer layer
             # self._validate_aquifer_layer(
             #     self.target_aquifer_layer, "Target aquifer")

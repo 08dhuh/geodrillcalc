@@ -109,62 +109,14 @@ def query_diameter_table(val:float,
         raise RuntimeError(f"An unexpected error occurred: {e}")
 
 
-def validate(value, condition=None):
-    """
-    Validates a given value based on a condition.
-
-    Parameters
-    ----------
-    value : Any
-        The value to be validated.
-    condition : callable, optional
-        A function or lambda that takes a single argument and returns True or False.
-
-    Returns
-    -------
-    bool
-        True if the value meets the condition or if no condition is provided; False otherwise.
-    """
-    if condition:
-        return condition(value)
-    return True
-
-
-def check_initial_calculation_feasibility(layer_df:pd.DataFrame,
-                                          target_top_layers=['100qa', '102utqa'],
-                                          target_layer='111lta'):
-    # TODO: implement check
-    """
-    Perform validation checks for the geology of the layers.
-    Raises exceptions When the aquifer layer data is empty,
-    """
-    #data should not be empty
-    layers = layer_df.index.tolist()
-    if len(layers) == 0:
-        raise ValueError('Aquifer layer data is empty')
-    
-    #top layer verification
-    top_layer = layers[0]
-    if top_layer not in target_top_layers:
-        raise ValueError(f'Top layer is {top_layer}, which is not an aquifer layer.')
-
-    #target layer must be present in the data
-    if not target_layer in layers:
-        raise ValueError(f'{target_layer} not present in the layer list')
-    
-    #conditions for the target layer
-    target_index=layer_df.index.get_loc(
-            target_layer)
-    if target_index >= len(layers) - 1:
-        raise ValueError(
-                f"Target aquifer '{target_layer}' is the bottommost layer, which is not allowed.")
-    
-    return True
 
 
 def check_casing_feasibility(casing_df:pd.DataFrame):
     # bottom lengths must be larger than the top values
     invalid_df = casing_df.loc[casing_df['top'] >= casing_df['bottom']]
     if not invalid_df.empty:
-        raise Exception(f'Invalid casing design detected at following stage(s):', invalid_df)
+        raise ValueError(f'''Invalid casing design detected at the following stage(s):
+                         {invalid_df.index[0].replace('_',' ')} | 
+top: {invalid_df['top'][0]}m, 
+bottom: {invalid_df['bottom'][0]}m''')
     

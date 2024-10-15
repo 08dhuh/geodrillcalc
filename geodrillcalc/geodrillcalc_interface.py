@@ -27,8 +27,10 @@ from .wellborecalc.wellborecalc_pipeline import CalcPipeline
 from .wellborecost.wellborecost_pipeline import CostPipeline
 
 from .utils.utils import getlogger
+from .utils.validation import check_initial_calculation_feasibility
+from .utils.data_preparation import initialise_aquifer_layer_table
 from typing import Optional
-import json
+
 
 
 #TODO: add a check to ensure that essential parameters like aquifer_layer_table and initial_input_params are valid before proceeding
@@ -124,6 +126,8 @@ class GeoDrillCalcInterface:
             
             self._log_outcome()
             return self.wbd
+        except ValueError as e:
+            raise e
         except Exception as e:
             self.logger.exception("Wellbore calculation failed")
             raise e
@@ -143,11 +147,13 @@ class GeoDrillCalcInterface:
         initial_input_params : dict
             A dictionary containing initial input parameters.
         """
+        aquifer_pd = initialise_aquifer_layer_table(aquifer_layer_table)
+        check_initial_calculation_feasibility(aquifer_pd)
         if self.is_production_well is None:
             self.is_production_well = is_production_well
         if self.wbd is None:
             self.wbd = WellBoreDataStore(is_production_well)
-        self.wbd._initialise_calculation_parameters(aquifer_layer_table=aquifer_layer_table,
+        self.wbd._initialise_calculation_parameters(aquifer_layer_table=aquifer_pd,
                                                     **initial_input_params)
 
 
