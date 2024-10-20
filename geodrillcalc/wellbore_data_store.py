@@ -4,6 +4,8 @@ import pandas as pd
 
 
 from .utils.utils import getlogger, serialize_results
+from .utils.data_preparation import initialise_aquifer_layer_table
+
 
 class WellBoreDataStore:
     """
@@ -87,7 +89,10 @@ class WellBoreDataStore:
         "pump_inlet_depth": float,
         "minimum_pump_housing_diameter": float,
 
-        "casing_stage_table": pd.DataFrame
+        "casing_stage_table": pd.DataFrame,
+
+        #addition
+        "aquifer_table": pd.DataFrame
     }
 
     _OUTPUT_INSTALLATION_PRODUCTION_ATTRIBUTES = {
@@ -135,8 +140,9 @@ class WellBoreDataStore:
             self.required_flow_rate_per_m3_sec = self.required_flow_rate / 86400
             self.bore_lifetime_per_day = self.bore_lifetime_year * 365
 
-            self._initialise_aquifer_layer_table(kwargs.get('aquifer_layer_table'))
-
+            #self._initialise_aquifer_layer_table(kwargs.get('aquifer_layer_table'))
+            self.aquifer_table = (kwargs.get('aquifer_layer_table'))
+            self.aquifer_layer_table = initialise_aquifer_layer_table(self.aquifer_table)
             # Validate and assign target aquifer layer
             # self._validate_aquifer_layer(
             #     self.target_aquifer_layer, "Target aquifer")

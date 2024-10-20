@@ -6,7 +6,7 @@ from geodrillcalc.utils.calc_utils import find_next_largest_value, query_diamete
 from ..wellbore_data_store import WellBoreDataStore
 from . import casing_calculation as cc, pump_calculation as cp, screen_calculation as ci
 from ..utils.utils import getlogger
-from ..utils.calc_utils import check_initial_calculation_feasibility, check_casing_feasibility
+from ..utils.calc_utils import check_casing_feasibility
 
 #TODO: error messages: The algorithm is unable to design an appropriate bore for that location. Please choose another location.
 class CalcPipeline:
@@ -92,7 +92,7 @@ class CalcPipeline:
                 raise RuntimeError(
                 f"Input parameters must be assigned to WellBoreDataStore object before calling the current class {self.__name__}")
             #validate wellbore design feasibility
-            check_initial_calculation_feasibility(self.wbd.aquifer_layer_table)
+            #check_initial_calculation_feasibility(self.wbd.aquifer_layer_table)
             
             self.wbd.ready_for_installation_output = False
             self._screen_pipeline()
@@ -104,7 +104,7 @@ class CalcPipeline:
 
             self.wbd.ready_for_installation_output = True
         except ValueError as e:
-            raise ValueError from e
+            raise e
         except ZeroDivisionError as e:
             logger.error(
                 f"Zero division error occurred in interval calculations: {str(e)}")
