@@ -153,7 +153,7 @@ class GeoDrillCalcInterface:
             self.is_production_well = is_production_well
         if self.wbd is None:
             self.wbd = WellBoreDataStore(is_production_well)
-        self.wbd._initialise_calculation_parameters(aquifer_layer_table=aquifer_pd,
+        self.wbd._initialise_calculation_parameters(aquifer_layer_table=aquifer_layer_table,
                                                     **initial_input_params)
 
 
