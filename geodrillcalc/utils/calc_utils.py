@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 def find_nearest_value(val,
-                       array,
+                       array:np.ndarray,
                        larger_than_or_equal_val=True,
                        one_size_larger=False):
     """
@@ -14,7 +14,7 @@ def find_nearest_value(val,
     ----------
     val : float
         The target value for which the nearest value is to be found.
-    array : list or numpy.ndarray
+    array : numpy.ndarray
         The array of values to search for the nearest value.
     larger_than_or_equal_val : bool, optional
         If True, search for values larger than or equal to 'val'. If False, search for values strictly larger than 'val'. Default is True.
@@ -56,6 +56,12 @@ def find_next_largest_value(val, array):
     float
         The next nominal casing size larger than 'val' in the 'array'.
     """
+    if not isinstance(array, (list, np.ndarray)):
+        raise TypeError("Input array must be a list or numpy.ndarray.")
+    if len(array) == 0:
+        raise ValueError("Input array is empty.")
+    if not isinstance(array, np.ndarray):
+        array = np.array(array)
     return find_nearest_value(val,
                               array,
                               one_size_larger=True)
