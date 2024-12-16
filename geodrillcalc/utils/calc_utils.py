@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from ..exceptions import InvalidCasingDesignError
 
 def find_nearest_value(val,
                        array:np.ndarray,
@@ -121,8 +122,16 @@ def check_casing_feasibility(casing_df:pd.DataFrame):
     # bottom lengths must be larger than the top values
     invalid_df = casing_df.loc[casing_df['top'] >= casing_df['bottom']]
     if not invalid_df.empty:
-        raise ValueError(f'''Invalid casing design detected at the following stage(s):
-                         {invalid_df.index[0].replace('_',' ')} | 
-top: {invalid_df['top'][0]}m, 
-bottom: {invalid_df['bottom'][0]}m''')
+        stage = invalid_df.index[0].replace('_', ' ')
+        top = invalid_df.iloc[0]['top']
+        bottom = invalid_df.iloc[0]['bottom']
+        
+
+        raise InvalidCasingDesignError(stage=stage, top=top, bottom=bottom)
+#     if not invalid_df.empty:
+        
+#         raise ValueError(f'''Invalid casing design detected at the following stage(s):
+#                          {invalid_df.index[0].replace('_',' ')} | 
+# top: {invalid_df['top'][0]}m, 
+# bottom: {invalid_df['bottom'][0]}m''')
     

@@ -1,5 +1,8 @@
 #!/usr/bin/env python
+import pytest
+import pandas as pd
 
+import geodrillcalc.exceptions
 def test_pipeline():
     import geodrillcalc.geodrillcalc_interface as gdc
     from geodrillcalc.wellborecost.cost_parameter_extractor import CostParameterExtractor
@@ -97,4 +100,3 @@ def test_pipeline():
 
 
     #assert not wellbore_cost_calculator.cost_estimation_table.empty
-
