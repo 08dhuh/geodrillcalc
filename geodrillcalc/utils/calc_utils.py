@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+from ..exceptions import InvalidCasingDesignError
 
 def find_nearest_value(val,
-                       array,
+                       array:np.ndarray,
                        larger_than_or_equal_val=True,
                        one_size_larger=False):
     """
@@ -14,7 +15,7 @@ def find_nearest_value(val,
     ----------
     val : float
         The target value for which the nearest value is to be found.
-    array : list or numpy.ndarray
+    array : numpy.ndarray
         The array of values to search for the nearest value.
     larger_than_or_equal_val : bool, optional
         If True, search for values larger than or equal to 'val'. If False, search for values strictly larger than 'val'. Default is True.
@@ -56,6 +57,12 @@ def find_next_largest_value(val, array):
     float
         The next nominal casing size larger than 'val' in the 'array'.
     """
+    if not isinstance(array, (list, np.ndarray)):
+        raise TypeError("Input array must be a list or numpy.ndarray.")
+    if len(array) == 0:
+        raise ValueError("Input array is empty.")
+    if not isinstance(array, np.ndarray):
+        array = np.array(array)
     return find_nearest_value(val,
                               array,
                               one_size_larger=True)
@@ -115,8 +122,16 @@ def check_casing_feasibility(casing_df:pd.DataFrame):
     # bottom lengths must be larger than the top values
     invalid_df = casing_df.loc[casing_df['top'] >= casing_df['bottom']]
     if not invalid_df.empty:
-        raise ValueError(f'''Invalid casing design detected at the following stage(s):
-                         {invalid_df.index[0].replace('_',' ')} | 
-top: {invalid_df['top'][0]}m, 
-bottom: {invalid_df['bottom'][0]}m''')
+        stage = invalid_df.index[0].replace('_', ' ')
+        top = invalid_df.iloc[0]['top']
+        bottom = invalid_df.iloc[0]['bottom']
+        
+
+        raise InvalidCasingDesignError(stage=stage, top=top, bottom=bottom)
+#     if not invalid_df.empty:
+        
+#         raise ValueError(f'''Invalid casing design detected at the following stage(s):
+#                          {invalid_df.index[0].replace('_',' ')} | 
+# top: {invalid_df['top'][0]}m, 
+# bottom: {invalid_df['bottom'][0]}m''')
     

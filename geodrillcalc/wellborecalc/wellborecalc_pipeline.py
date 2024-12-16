@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from geodrillcalc.utils.calc_utils import find_next_largest_value, query_diameter_table
-from ..wellbore_data_store import WellBoreDataStore
+from ..data_management.wellbore_data_store import WellBoreDataStore
 from . import casing_calculation as cc, pump_calculation as cp, screen_calculation as ci
 from ..utils.utils import getlogger
 from ..utils.calc_utils import check_casing_feasibility

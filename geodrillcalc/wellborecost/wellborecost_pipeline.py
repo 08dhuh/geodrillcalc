@@ -1,6 +1,6 @@
 import pandas as pd
 import json
-from ..wellbore_data_store import WellBoreDataStore
+from ..data_management.wellbore_data_store import WellBoreDataStore
 from .cost_parameter_extractor import CostParameterExtractor
 from .cost_stage_calculator import CostStageCalculator
 from ..utils.utils import getlogger

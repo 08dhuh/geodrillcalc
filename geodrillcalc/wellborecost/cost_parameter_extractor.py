@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from ..wellbore_data_store import WellBoreDataStore
+from ..data_management.wellbore_data_store import WellBoreDataStore
 from ..utils.utils import getlogger
 
 class CostParameterExtractor:

@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 
 
-from .utils.utils import getlogger, serialize_results
-from .utils.data_preparation import initialise_aquifer_layer_table
+from ..utils.utils import getlogger, serialize_results
+from ..utils.data_preparation import initialise_aquifer_layer_table
 
 
 class WellBoreDataStore:

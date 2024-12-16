@@ -21,7 +21,7 @@ Note:
 Ensure that you provide valid depth data and initial input data
 when using the 'calculate_and_return_wellbore_parameters' method.
 """
-from .wellbore_data_store import WellBoreDataStore
+from .data_management.wellbore_data_store import WellBoreDataStore
 from .wellborecalc.wellborecalc_pipeline import CalcPipeline
 
 from .wellborecost.wellborecost_pipeline import CostPipeline
