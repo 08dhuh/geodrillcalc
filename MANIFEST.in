@@ -1,0 +1,4 @@
+include README.md
+recursive-include geodrillcalc *.py
+recursive-include geodrillcalc/data *.json
+recursive-include geodrillcalc/data_management *
